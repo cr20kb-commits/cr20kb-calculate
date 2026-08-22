@@ -1,6 +1,9 @@
 name: Scout runtime smoke
 
 on:
+  pull_request:
+    paths:
+      - ".github/workflows/scout-runtime-smoke.yml"
   push:
     branches:
       - "agent/scout-runtime-smoke"
