@@ -1,0 +1,132 @@
+name: Scout runtime smoke
+
+on:
+  push:
+    branches:
+      - "agent/scout-runtime-smoke"
+    paths:
+      - ".github/workflows/scout-runtime-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install 'yt-dlp[default]==2026.7.4'
+          python -m pip check
+
+      - name: Verify public YouTube and TikTok extraction
+        shell: bash
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import shutil
+          import subprocess
+          from typing import Any
+
+          from yt_dlp import YoutubeDL
+          from yt_dlp.version import __version__
+
+          YOUTUBE_URL = "https://www.youtube.com/watch?v=BaW_jenozKc"
+          TIKTOK_URL = "https://www.tiktok.com/@leenabhushan/video/6748451240264420610"
+
+          options: dict[str, Any] = {
+              "quiet": True,
+              "no_warnings": True,
+              "ignoreconfig": True,
+              "cachedir": False,
+              "js_runtimes": {"node": {}},
+              "noplaylist": True,
+              "socket_timeout": 25,
+              "retries": 2,
+              "extractor_retries": 2,
+              "fragment_retries": 2,
+              "restrictfilenames": True,
+              "skip_download": True,
+          }
+
+          node_path = shutil.which("node")
+          if not node_path:
+              raise SystemExit("Node.js is missing")
+          node_version = subprocess.check_output([node_path, "--version"], text=True).strip()
+
+          result: dict[str, Any] = {
+              "yt_dlp": __version__,
+              "node": node_version,
+              "youtube": {},
+              "tiktok": {},
+          }
+
+          with YoutubeDL(options) as ydl:
+              youtube = ydl.extract_info(YOUTUBE_URL, download=False)
+          if not isinstance(youtube, dict) or youtube.get("id") != "BaW_jenozKc":
+              raise SystemExit("YouTube metadata extraction returned an unexpected result")
+          result["youtube"] = {
+              "status": "ok",
+              "id": youtube.get("id"),
+              "extractor": youtube.get("extractor_key") or youtube.get("extractor"),
+              "title": str(youtube.get("title") or "")[:120],
+          }
+
+          try:
+              with YoutubeDL(options) as ydl:
+                  tiktok = ydl.extract_info(TIKTOK_URL, download=False)
+              if not isinstance(tiktok, dict) or not tiktok.get("id"):
+                  raise RuntimeError("TikTok extractor returned no stable media id")
+              result["tiktok"] = {
+                  "status": "ok",
+                  "id": tiktok.get("id"),
+                  "extractor": tiktok.get("extractor_key") or tiktok.get("extractor"),
+                  "title": str(tiktok.get("title") or "")[:120],
+              }
+          except Exception as exc:
+              # TikTok access is explicitly best-effort in Scout v0.1. A bounded,
+              # human-readable platform error is an accepted smoke-test outcome.
+              result["tiktok"] = {
+                  "status": "bounded_error",
+                  "error_type": type(exc).__name__,
+                  "error": str(exc)[:500],
+              }
+
+          print(json.dumps(result, ensure_ascii=False, indent=2))
+
+          with open("/tmp/scout-runtime-smoke.json", "w", encoding="utf-8") as handle:
+              json.dump(result, handle, ensure_ascii=False, indent=2)
+
+          with open("/tmp/scout-runtime-summary.md", "w", encoding="utf-8") as handle:
+              handle.write("# Scout runtime smoke\n\n")
+              handle.write(f"- yt-dlp: `{result['yt_dlp']}`\n")
+              handle.write(f"- Node: `{result['node']}`\n")
+              handle.write(f"- YouTube: **{result['youtube']['status']}** — `{result['youtube'].get('id', '')}`\n")
+              handle.write(f"- TikTok: **{result['tiktok']['status']}** — `{result['tiktok'].get('id', result['tiktok'].get('error_type', ''))}`\n")
+          PY
+          cat /tmp/scout-runtime-summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload smoke result
+        uses: actions/upload-artifact@v4
+        with:
+          name: scout-runtime-smoke
+          path: /tmp/scout-runtime-smoke.json
+          if-no-files-found: error
+          retention-days: 7
