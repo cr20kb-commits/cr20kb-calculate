@@ -16,53 +16,310 @@
     --good: #dfe7d9;
     --shadow: 0 18px 50px rgba(0,0,0,.28);
   }
+
   * { box-sizing: border-box; }
-  html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
-  body { display: flex; justify-content: center; padding: 24px 14px 40px; }
-  .app { width: min(880px, 100%); }
-  .topbar { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 18px; }
-  .brand { font-weight: 800; letter-spacing: .06em; font-size: 14px; color: var(--muted); }
-  .currency { display: flex; gap: 6px; background: var(--card); border: 1px solid var(--line); padding: 4px; border-radius: 12px; }
-  .currency button { border: 0; background: transparent; color: var(--muted); min-width: 38px; height: 34px; border-radius: 9px; font-size: 15px; cursor: pointer; }
-  .currency button.active { background: var(--text); color: #111318; font-weight: 800; }
-  .hero { padding: 26px 24px; background: linear-gradient(180deg, #1a1e26 0%, #15181f 100%); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); }
-  h1 { margin: 0 0 8px; font-size: clamp(30px, 7vw, 56px); line-height: .98; letter-spacing: -.04em; }
-  .subtitle { margin: 0; color: var(--muted); max-width: 720px; font-size: 16px; line-height: 1.5; }
-  .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; margin-top: 18px; }
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
-  .label { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 12px; }
-  .label strong { font-size: 17px; }
-  .label span { color: var(--muted); font-size: 13px; }
-  .money-input { display: flex; align-items: center; background: var(--card2); border: 1px solid var(--line); border-radius: 14px; padding: 5px 12px; }
-  .money-input input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font-size: clamp(24px, 5vw, 34px); font-weight: 800; padding: 8px 0; min-width: 0; }
-  .money-input .sym { color: var(--muted); font-size: 20px; font-weight: 700; margin-left: 8px; }
-  input[type="range"] { width: 100%; margin: 18px 0 4px; accent-color: var(--text); cursor: pointer; }
-  .range-hints { display: flex; justify-content: space-between; color: #7f8795; font-size: 11px; }
-  .result { margin-top: 16px; padding: 26px 22px; background: var(--text); color: #101217; border-radius: 22px; text-align: center; }
-  .result .eyebrow { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; opacity: .58; }
-  .result .big { margin-top: 8px; font-size: clamp(42px, 11vw, 86px); line-height: .95; font-weight: 900; letter-spacing: -.05em; }
-  .result .explain { margin-top: 10px; font-size: 16px; line-height: 1.45; opacity: .72; }
-  .scenarios { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .scenario { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 12px; text-align: center; }
-  .scenario .x { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .scenario .v { margin-top: 5px; font-size: 22px; font-weight: 850; }
-  .goal { margin-top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
-  .goal h2 { margin: 0 0 6px; font-size: 19px; }
-  .goal p { color: var(--muted); margin: 0 0 14px; line-height: 1.45; }
-  .goal-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
-  .goal-row select { width: 100%; background: var(--card2); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-size: 15px; }
-  .goal-output { min-width: 170px; text-align: right; }
-  .goal-output .small { color: var(--muted); font-size: 12px; }
-  .goal-output .amount { font-size: 24px; font-weight: 900; margin-top: 2px; }
-  .quote { margin-top: 16px; padding: 18px 20px; border-left: 3px solid var(--text); color: var(--muted); line-height: 1.55; background: rgba(255,255,255,.025); border-radius: 0 14px 14px 0; }
-  .foot { margin-top: 14px; color: #707887; font-size: 12px; line-height: 1.5; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, Arial, sans-serif;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 24px 14px 40px;
+  }
+
+  .app {
+    width: min(880px, 100%);
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .brand {
+    font-weight: 800;
+    letter-spacing: .06em;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .brand a { color: inherit; text-decoration: none; }
+  .brand a:hover { color: var(--text); }
+
+  .currency {
+    display: flex;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  .currency button {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    min-width: 38px;
+    height: 34px;
+    border-radius: 9px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .currency button.active {
+    background: var(--text);
+    color: #111318;
+    font-weight: 800;
+  }
+
+  .hero {
+    padding: 26px 24px;
+    background: linear-gradient(180deg, #1a1e26 0%, #15181f 100%);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: clamp(30px, 7vw, 56px);
+    line-height: .98;
+    letter-spacing: -.04em;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--muted);
+    max-width: 720px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 16px;
+    margin-top: 18px;
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 20px;
+  }
+
+  .label {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+
+  .label strong {
+    font-size: 17px;
+  }
+
+  .label span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .money-input {
+    display: flex;
+    align-items: center;
+    background: var(--card2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 5px 12px;
+  }
+
+  .money-input input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: clamp(24px, 5vw, 34px);
+    font-weight: 800;
+    padding: 8px 0;
+    min-width: 0;
+  }
+
+  .money-input .sym {
+    color: var(--muted);
+    font-size: 20px;
+    font-weight: 700;
+    margin-left: 8px;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    margin: 18px 0 4px;
+    accent-color: var(--text);
+    cursor: pointer;
+  }
+
+  .range-hints {
+    display: flex;
+    justify-content: space-between;
+    color: #7f8795;
+    font-size: 11px;
+  }
+
+  .result {
+    margin-top: 16px;
+    padding: 26px 22px;
+    background: var(--text);
+    color: #101217;
+    border-radius: 22px;
+    text-align: center;
+  }
+
+  .result .eyebrow {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    opacity: .58;
+  }
+
+  .result .big {
+    margin-top: 8px;
+    font-size: clamp(42px, 11vw, 86px);
+    line-height: .95;
+    font-weight: 900;
+    letter-spacing: -.05em;
+  }
+
+  .result .explain {
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.45;
+    opacity: .72;
+  }
+
+  .scenarios {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .scenario {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+
+  .scenario .x {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .scenario .v {
+    margin-top: 5px;
+    font-size: 22px;
+    font-weight: 850;
+  }
+
+  .goal {
+    margin-top: 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 20px;
+  }
+
+  .goal h2 {
+    margin: 0 0 6px;
+    font-size: 19px;
+  }
+
+  .goal p {
+    color: var(--muted);
+    margin: 0 0 14px;
+    line-height: 1.45;
+  }
+
+  .goal-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .goal-row select {
+    width: 100%;
+    background: var(--card2);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .goal-output {
+    min-width: 170px;
+    text-align: right;
+  }
+
+  .goal-output .small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .goal-output .amount {
+    font-size: 24px;
+    font-weight: 900;
+    margin-top: 2px;
+  }
+
+  .quote {
+    margin-top: 16px;
+    padding: 18px 20px;
+    border-left: 3px solid var(--text);
+    color: var(--muted);
+    line-height: 1.55;
+    background: rgba(255,255,255,.025);
+    border-radius: 0 14px 14px 0;
+  }
+
+  .foot {
+    margin-top: 14px;
+    color: #707887;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
   @media (max-width: 680px) {
     body { padding: 14px 10px 28px; }
     .hero { padding: 22px 16px; border-radius: 20px; }
     .grid { grid-template-columns: 1fr; }
     .panel { padding: 16px; }
     .scenarios { grid-template-columns: 1fr; }
-    .scenario { display: flex; justify-content: space-between; align-items: center; text-align: left; padding: 14px 16px; }
+    .scenario {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+      padding: 14px 16px;
+    }
     .scenario .v { margin: 0; }
     .goal-row { grid-template-columns: 1fr; }
     .goal-output { text-align: left; }
@@ -72,54 +329,107 @@
 <body>
 <main class="app">
   <div class="topbar">
-    <div class="brand">CR20KB · АНТИИМПУЛЬС</div>
+    <div class="brand"><a href="https://cr20kb.com/" target="_blank" rel="noopener">CR20KB.COM · АНТИИМПУЛЬС</a></div>
     <div class="currency" aria-label="Валюта">
       <button type="button" class="active" data-currency="₴">₴</button>
       <button type="button" data-currency="$">$</button>
       <button type="button" data-currency="€">€</button>
     </div>
   </div>
+
   <section class="hero">
     <h1>Цена жизни</h1>
-    <p class="subtitle">У вещи есть цена не только в деньгах. Посмотри, какую долю твоего текущего дохода — а значит, условно и времени жизни — она забирает.</p>
+    <p class="subtitle">
+      У вещи есть цена не только в деньгах. Посмотри, какую долю твоего текущего дохода —
+      а значит, условно и времени жизни — она забирает.
+    </p>
+
     <div class="grid">
       <div class="panel">
-        <div class="label"><strong>Доход за год</strong><span>в той же валюте</span></div>
-        <div class="money-input"><input id="incomeInput" inputmode="numeric" value="600000" aria-label="Доход за год"><span class="sym">₴</span></div>
+        <div class="label">
+          <strong>Доход за год</strong>
+          <span>в той же валюте</span>
+        </div>
+        <div class="money-input">
+          <input id="incomeInput" inputmode="numeric" value="600000" aria-label="Доход за год">
+          <span class="sym">₴</span>
+        </div>
         <input id="incomeRange" type="range" min="2" max="8" step="0.01" value="5.7782">
-        <div class="range-hints"><span>100</span><span>100 млн</span></div>
+        <div class="range-hints">
+          <span>100</span>
+          <span>100 млн</span>
+        </div>
       </div>
+
       <div class="panel">
-        <div class="label"><strong>Цена вещи</strong><span>хочу купить</span></div>
-        <div class="money-input"><input id="priceInput" inputmode="numeric" value="50000" aria-label="Цена вещи"><span class="sym">₴</span></div>
+        <div class="label">
+          <strong>Цена вещи</strong>
+          <span>хочу купить</span>
+        </div>
+        <div class="money-input">
+          <input id="priceInput" inputmode="numeric" value="50000" aria-label="Цена вещи">
+          <span class="sym">₴</span>
+        </div>
         <input id="priceRange" type="range" min="1" max="8" step="0.01" value="4.699">
-        <div class="range-hints"><span>10</span><span>100 млн</span></div>
+        <div class="range-hints">
+          <span>10</span>
+          <span>100 млн</span>
+        </div>
       </div>
     </div>
+
     <div class="result">
       <div class="eyebrow">Эта покупка стоит тебе примерно</div>
       <div class="big" id="mainResult">1 месяц</div>
       <div class="explain" id="mainExplain">8,3% твоего годового дохода</div>
     </div>
+
     <div class="scenarios">
-      <div class="scenario"><div class="x">Доход ×2</div><div class="v" id="x2">15 дней</div></div>
-      <div class="scenario"><div class="x">Доход ×3</div><div class="v" id="x3">10 дней</div></div>
-      <div class="scenario"><div class="x">Доход ×5</div><div class="v" id="x5">6 дней</div></div>
+      <div class="scenario">
+        <div class="x">Доход ×2</div>
+        <div class="v" id="x2">15 дней</div>
+      </div>
+      <div class="scenario">
+        <div class="x">Доход ×3</div>
+        <div class="v" id="x3">10 дней</div>
+      </div>
+      <div class="scenario">
+        <div class="x">Доход ×5</div>
+        <div class="v" id="x5">6 дней</div>
+      </div>
     </div>
+
     <div class="goal">
       <h2>А если поставить цель?</h2>
       <p>Сколько нужно зарабатывать в год, чтобы эта покупка стоила тебе не больше выбранного времени.</p>
       <div class="goal-row">
         <select id="goalSelect" aria-label="Целевое время">
-          <option value="1">1 день</option><option value="3">3 дня</option><option value="7" selected>1 неделю</option><option value="14">2 недели</option><option value="30.4375">1 месяц</option>
+          <option value="1">1 день</option>
+          <option value="3">3 дня</option>
+          <option value="7" selected>1 неделю</option>
+          <option value="14">2 недели</option>
+          <option value="30.4375">1 месяц</option>
         </select>
-        <div class="goal-output"><div class="small">нужен годовой доход</div><div class="amount" id="goalAmount">2 607 143 ₴</div></div>
+        <div class="goal-output">
+          <div class="small">нужен годовой доход</div>
+          <div class="amount" id="goalAmount">2 607 143 ₴</div>
+        </div>
       </div>
     </div>
-    <div class="quote">Можно бесконечно экономить на вещах. А можно сделать так, чтобы они стоили тебе меньше жизни: выучиться новому, поднять ставку, сменить работу, создать продукт или собрать команду.</div>
-    <div class="foot">Это мотивационный калькулятор, а не финансовая модель. Он сравнивает цену покупки с годовым доходом и переводит долю года в календарное время. Налоги, обязательные расходы, накопления и реальное рабочее время здесь не учитываются.</div>
+
+    <div class="quote">
+      Можно бесконечно экономить на вещах. А можно сделать так, чтобы они стоили тебе меньше жизни:
+      выучиться новому, поднять ставку, сменить работу, создать продукт или собрать команду.
+    </div>
+
+    <div class="foot">
+      Это мотивационный калькулятор, а не финансовая модель. Он сравнивает цену покупки с годовым доходом
+      и переводит долю года в календарное время. Налоги, обязательные расходы, накопления и реальное рабочее
+      время здесь не учитываются.
+    </div>
   </section>
 </main>
+
 <script>
 (() => {
   const incomeInput = document.getElementById('incomeInput');
@@ -132,37 +442,127 @@
   const goalAmount = document.getElementById('goalAmount');
   const currencyButtons = [...document.querySelectorAll('.currency button')];
   const symEls = [...document.querySelectorAll('.sym')];
+
   let currency = '₴';
+
   const nf0 = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
   const nf1 = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 });
-  function parseNumber(value) { const cleaned = String(value).replace(/[^\d.,]/g, '').replace(',', '.'); const n = Number(cleaned); return Number.isFinite(n) ? n : 0; }
-  function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
-  function valueFromLogSlider(slider) { return Math.pow(10, Number(slider.value)); }
-  function setLogSliderFromValue(slider, value) { if (value <= 0) return; const min = Number(slider.min); const max = Number(slider.max); slider.value = clamp(Math.log10(value), min, max); }
-  function plural(n, one, few, many) { const i = Math.floor(Math.abs(n)); const mod10 = i % 10, mod100 = i % 100; if (mod10 === 1 && mod100 !== 11) return one; if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return few; return many; }
+
+  function parseNumber(value) {
+    const cleaned = String(value).replace(/[^\d.,]/g, '').replace(',', '.');
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function clamp(n, min, max) {
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function valueFromLogSlider(slider) {
+    return Math.pow(10, Number(slider.value));
+  }
+
+  function setLogSliderFromValue(slider, value) {
+    if (value <= 0) return;
+    const min = Number(slider.min);
+    const max = Number(slider.max);
+    slider.value = clamp(Math.log10(value), min, max);
+  }
+
+  function plural(n, one, few, many) {
+    const i = Math.floor(Math.abs(n));
+    const mod10 = i % 10, mod100 = i % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return few;
+    return many;
+  }
+
   function formatLife(days) {
     if (!Number.isFinite(days) || days < 0) return '—';
+
     const hours = days * 24;
-    if (hours < 48) { const v = Math.max(0.1, hours); const rounded = v < 10 ? Math.round(v * 10) / 10 : Math.round(v); return `${nf1.format(rounded)} ${plural(rounded, 'час', 'часа', 'часов')}`; }
-    if (days < 60) { const rounded = days < 10 ? Math.round(days * 10) / 10 : Math.round(days); return `${nf1.format(rounded)} ${plural(rounded, 'день', 'дня', 'дней')}`; }
+    if (hours < 48) {
+      const v = Math.max(0.1, hours);
+      const rounded = v < 10 ? Math.round(v * 10) / 10 : Math.round(v);
+      return `${nf1.format(rounded)} ${plural(rounded, 'час', 'часа', 'часов')}`;
+    }
+
+    if (days < 60) {
+      const rounded = days < 10 ? Math.round(days * 10) / 10 : Math.round(days);
+      return `${nf1.format(rounded)} ${plural(rounded, 'день', 'дня', 'дней')}`;
+    }
+
     const months = days / 30.4375;
-    if (months < 24) { const rounded = months < 10 ? Math.round(months * 10) / 10 : Math.round(months); return `${nf1.format(rounded)} ${plural(rounded, 'месяц', 'месяца', 'месяцев')}`; }
-    const years = days / 365.25; const rounded = years < 10 ? Math.round(years * 10) / 10 : Math.round(years); return `${nf1.format(rounded)} ${plural(rounded, 'год', 'года', 'лет')}`;
+    if (months < 24) {
+      const rounded = months < 10 ? Math.round(months * 10) / 10 : Math.round(months);
+      return `${nf1.format(rounded)} ${plural(rounded, 'месяц', 'месяца', 'месяцев')}`;
+    }
+
+    const years = days / 365.25;
+    const rounded = years < 10 ? Math.round(years * 10) / 10 : Math.round(years);
+    return `${nf1.format(rounded)} ${plural(rounded, 'год', 'года', 'лет')}`;
   }
+
   function calculate() {
-    const income = parseNumber(incomeInput.value); const price = parseNumber(priceInput.value);
-    if (income <= 0 || price < 0) { mainResult.textContent = '—'; mainExplain.textContent = 'Введите годовой доход больше нуля'; ['x2','x3','x5'].forEach(id => document.getElementById(id).textContent = '—'); goalAmount.textContent = '—'; return; }
-    const share = price / income; const days = share * 365.25;
-    mainResult.textContent = formatLife(days); mainExplain.textContent = `${nf1.format(share * 100)}% твоего годового дохода`;
-    document.getElementById('x2').textContent = formatLife(days / 2); document.getElementById('x3').textContent = formatLife(days / 3); document.getElementById('x5').textContent = formatLife(days / 5);
-    const goalDays = Number(goalSelect.value); const neededIncome = goalDays > 0 ? price * 365.25 / goalDays : 0; goalAmount.textContent = `${nf0.format(Math.ceil(neededIncome))} ${currency}`;
+    const income = parseNumber(incomeInput.value);
+    const price = parseNumber(priceInput.value);
+
+    if (income <= 0 || price < 0) {
+      mainResult.textContent = '—';
+      mainExplain.textContent = 'Введите годовой доход больше нуля';
+      ['x2','x3','x5'].forEach(id => document.getElementById(id).textContent = '—');
+      goalAmount.textContent = '—';
+      return;
+    }
+
+    const share = price / income;
+    const days = share * 365.25;
+
+    mainResult.textContent = formatLife(days);
+    mainExplain.textContent = `${nf1.format(share * 100)}% твоего годового дохода`;
+
+    document.getElementById('x2').textContent = formatLife(days / 2);
+    document.getElementById('x3').textContent = formatLife(days / 3);
+    document.getElementById('x5').textContent = formatLife(days / 5);
+
+    const goalDays = Number(goalSelect.value);
+    const neededIncome = goalDays > 0 ? price * 365.25 / goalDays : 0;
+    goalAmount.textContent = `${nf0.format(Math.ceil(neededIncome))} ${currency}`;
   }
-  incomeRange.addEventListener('input', () => { incomeInput.value = Math.round(valueFromLogSlider(incomeRange)); calculate(); });
-  priceRange.addEventListener('input', () => { priceInput.value = Math.round(valueFromLogSlider(priceRange)); calculate(); });
-  incomeInput.addEventListener('input', () => { const v = parseNumber(incomeInput.value); setLogSliderFromValue(incomeRange, v); calculate(); });
-  priceInput.addEventListener('input', () => { const v = parseNumber(priceInput.value); setLogSliderFromValue(priceRange, v); calculate(); });
+
+  incomeRange.addEventListener('input', () => {
+    incomeInput.value = Math.round(valueFromLogSlider(incomeRange));
+    calculate();
+  });
+
+  priceRange.addEventListener('input', () => {
+    priceInput.value = Math.round(valueFromLogSlider(priceRange));
+    calculate();
+  });
+
+  incomeInput.addEventListener('input', () => {
+    const v = parseNumber(incomeInput.value);
+    setLogSliderFromValue(incomeRange, v);
+    calculate();
+  });
+
+  priceInput.addEventListener('input', () => {
+    const v = parseNumber(priceInput.value);
+    setLogSliderFromValue(priceRange, v);
+    calculate();
+  });
+
   goalSelect.addEventListener('change', calculate);
-  currencyButtons.forEach(btn => { btn.addEventListener('click', () => { currency = btn.dataset.currency; currencyButtons.forEach(b => b.classList.toggle('active', b === btn)); symEls.forEach(el => el.textContent = currency); calculate(); }); });
+
+  currencyButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currency = btn.dataset.currency;
+      currencyButtons.forEach(b => b.classList.toggle('active', b === btn));
+      symEls.forEach(el => el.textContent = currency);
+      calculate();
+    });
+  });
+
   calculate();
 })();
 </script>
