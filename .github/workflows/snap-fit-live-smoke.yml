@@ -1,0 +1,41 @@
+name: OPS Snap-Fit live smoke
+
+on:
+  push:
+    paths:
+      - '.github/workflows/snap-fit-live-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Wait for guarded CR20KB deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_SHA='0a5feac1a883ea5188af13257944db45fc38ad26'
+          for attempt in $(seq 1 16); do
+            stamp="${TARGET_SHA:0:12}-${attempt}-$(date +%s)"
+            page="$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://cr20kb.com/snap-fit-holder/?_=${stamp}" 2>/dev/null || true)"
+            core="$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://cr20kb.com/snap-fit-holder/core.js?_=${stamp}" 2>/dev/null || true)"
+            overlay="$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://cr20kb.com/garden-v3/snap-fit-holder-overlay.js?_=${stamp}" 2>/dev/null || true)"
+            root="$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://cr20kb.com/?_=${stamp}" 2>/dev/null || true)"
+            info="$(curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "https://cr20kb.com/build-info.json?_=${stamp}" 2>/dev/null || true)"
+            if grep -Fq 'TEST · v1' <<<"$page" \
+              && grep -Fq 'CR20KBSnapFitHolder' <<<"$core" \
+              && grep -Fq "const ID='snap-fit-holder'" <<<"$overlay" \
+              && grep -Fq "send('open_node')" <<<"$overlay" \
+              && grep -Fq '20260825-snapfit1' <<<"$root" \
+              && grep -Fq "$TARGET_SHA" <<<"$info"; then
+                echo "SNAP_FIT_LIVE_PASS sha=$TARGET_SHA attempt=$attempt"
+                exit 0
+            fi
+            echo "attempt $attempt: deployment not fully visible yet"
+            sleep 30
+          done
+          echo 'SNAP_FIT_LIVE_FAIL: guarded deployment did not become fully visible in time' >&2
+          exit 1
