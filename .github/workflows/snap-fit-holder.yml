@@ -23,4 +23,5 @@ jobs:
         with:
           node-version: '22'
       - run: node --check snap-fit-holder/core.js
+      - run: node --check snap-fit-holder/app.js
       - run: node snap-fit-holder/test.mjs
