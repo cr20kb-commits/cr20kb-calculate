@@ -36,26 +36,27 @@
   const cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
   function inTri(p,a,b,c,e=1e-10){return cross(a,b,p)>=-e&&cross(b,c,p)>=-e&&cross(c,a,p)>=-e}
   function triangulate(poly){let pts=poly.map(q=>[q[0],q[1]]);if(area2(pts)<0)pts.reverse();const idx=pts.map((_,i)=>i),tris=[];let guard=0;while(idx.length>3&&guard++<100000){let found=false;for(let k=0;k<idx.length;k++){const i0=idx[(k-1+idx.length)%idx.length],i1=idx[k],i2=idx[(k+1)%idx.length],a=pts[i0],b=pts[i1],c=pts[i2];if(cross(a,b,c)<=1e-10)continue;let bad=false;for(const j of idx){if(j!==i0&&j!==i1&&j!==i2&&inTri(pts[j],a,b,c)){bad=true;break}}if(bad)continue;tris.push([i0,i1,i2]);idx.splice(k,1);found=true;break}if(found)continue;let removed=false;for(let k=0;k<idx.length;k++){const i0=idx[(k-1+idx.length)%idx.length],i1=idx[k],i2=idx[(k+1)%idx.length];if(Math.abs(cross(pts[i0],pts[i1],pts[i2]))<1e-8){idx.splice(k,1);removed=true;break}}if(!removed)throw new Error('profile triangulation failed')}if(idx.length===3)tris.push([idx[0],idx[1],idx[2]]);return{points:pts,triangles:tris}}
+  function splitHoleEdges(poly,plateX,holeY,r){const out=[],eps=1e-7,targets=[-holeY-r,-holeY+r,holeY-r,holeY+r];for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];out.push([a[0],a[1]]);const plane=(Math.abs(a[0])<eps&&Math.abs(b[0])<eps)||(Math.abs(a[0]-plateX)<eps&&Math.abs(b[0]-plateX)<eps);if(!plane)continue;const dy=b[1]-a[1];if(Math.abs(dy)<eps)continue;const extra=[];for(const y of targets){const t=(y-a[1])/dy;if(t>eps&&t<1-eps)extra.push([t,[a[0],y]])}extra.sort((x,y)=>x[0]-y[0]);for(const q of extra)out.push(q[1])}return out}
 
   function mesh(options={}){
-    const R=resolve(options),p=R.params,T=triangulate(R.points),P=T.points,z0=-p.width/2,z1=p.width/2,faces=[];
+    const R=resolve(options),p=R.params,hr=p.holeD/2,P0=splitHoleEdges(R.points,R.plateThickness,R.holeY,hr),T=triangulate(P0),P=T.points,z0=-p.width/2,zm=0,z1=p.width/2,faces=[];
     const v=(x,y,z)=>[x,y,z],add=(a,b,c)=>faces.push([a,b,c]);
     for(const[a,b,c]of T.triangles){add(v(P[a][0],P[a][1],z0),v(P[c][0],P[c][1],z0),v(P[b][0],P[b][1],z0));add(v(P[a][0],P[a][1],z1),v(P[b][0],P[b][1],z1),v(P[c][0],P[c][1],z1))}
     const eps=1e-6,plateX=R.plateThickness;
-    function isHolePlaneEdge(a,b){if(Math.abs(a[0])<eps&&Math.abs(b[0])<eps)return true;if(Math.abs(a[0]-plateX)<eps&&Math.abs(b[0]-plateX)<eps)return true;return false}
-    for(let i=0;i<P.length;i++){const j=(i+1)%P.length,a=P[i],b=P[j];if(isHolePlaneEdge(a,b))continue;const a0=v(a[0],a[1],z0),b0=v(b[0],b[1],z0),b1=v(b[0],b[1],z1),a1=v(a[0],a[1],z1);add(a0,b0,b1);add(a0,b1,a1)}
-
+    function isPlateFaceEdge(a,b){return(Math.abs(a[0])<eps&&Math.abs(b[0])<eps)||(Math.abs(a[0]-plateX)<eps&&Math.abs(b[0]-plateX)<eps)}
+    for(let i=0;i<P.length;i++){const j=(i+1)%P.length,a=P[i],b=P[j];if(isPlateFaceEdge(a,b))continue;const a0=v(a[0],a[1],z0),b0=v(b[0],b[1],z0),am=v(a[0],a[1],zm),bm=v(b[0],b[1],zm),a1=v(a[0],a[1],z1),b1=v(b[0],b[1],z1);add(a0,b0,bm);add(a0,bm,am);add(am,bm,b1);add(am,b1,a1)}
     function triUV(x,A,B,C,sign){let a=v(x,A[0],A[1]),b=v(x,B[0],B[1]),c=v(x,C[0],C[1]);const ar=(B[0]-A[0])*(C[1]-A[1])-(B[1]-A[1])*(C[0]-A[0]);if((ar>0?1:-1)!==sign){const q=b;b=c;c=q}add(a,b,c)}
-    function quadUV(x,A,B,C,D,sign){triUV(x,A,B,C,sign);triUV(x,A,C,D,sign)}
-    function rectUV(x,u0,u1,v0,v1,sign){quadUV(x,[u0,v0],[u1,v0],[u1,v1],[u0,v1],sign)}
-    function plateSurface(x,yMin,yMax,centers,sign){const r=p.holeD/2,h=p.width/2,N=Math.max(16,p.quality),sorted=[...centers].sort((a,b)=>a-b);let cursor=yMin;for(const cy of sorted){const left=cy-r,right=cy+r;if(left>cursor)rectUV(x,cursor,left,-h,h,sign);const upper=[],lower=[];for(let i=0;i<=N/2;i++){const a=Math.PI-Math.PI*i/(N/2);upper.push([cy+Math.cos(a)*r,Math.sin(a)*r]);const b=Math.PI+Math.PI*i/(N/2);lower.push([cy+Math.cos(b)*r,Math.sin(b)*r])}for(let i=0;i<upper.length-1;i++)quadUV(x,upper[i],upper[i+1],[upper[i+1][0],h],[upper[i][0],h],sign);for(let i=0;i<lower.length-1;i++)quadUV(x,[lower[i][0],-h],[lower[i+1][0],-h],lower[i+1],lower[i],sign);cursor=right}if(cursor<yMax)rectUV(x,cursor,yMax,-h,h,sign)}
-    const yB=29.5*p.scale,yGap=8.5*p.scale,hc=R.holeY;
+    function polyUV(x,poly,sign){const t=triangulate(poly);for(const[a,b,c]of t.triangles)triUV(x,t.points[a],t.points[b],t.points[c],sign)}
+    function rectRaw(x,u0,u1,v0,v1,sign){triUV(x,[u0,v0],[u1,v0],[u1,v1],sign);triUV(x,[u0,v0],[u1,v1],[u0,v1],sign)}
+    function rectUV(x,u0,u1,v0,v1,sign){if(v0<0&&v1>0){rectRaw(x,u0,u1,v0,0,sign);rectRaw(x,u0,u1,0,v1,sign)}else rectRaw(x,u0,u1,v0,v1,sign)}
+    function plateSurface(x,yMin,yMax,centers,sign){const h=p.width/2,N=Math.max(16,p.quality);let cursor=yMin;for(const cy of[...centers].sort((a,b)=>a-b)){const left=cy-hr,right=cy+hr;if(left>cursor)rectUV(x,cursor,left,-h,h,sign);const upper=[[left,h],[right,h],[right,0]],lower=[[left,-h],[left,0]];for(let i=1;i<=N/2;i++){let a=Math.PI*i/(N/2);upper.push([cy+Math.cos(a)*hr,Math.sin(a)*hr]);a=Math.PI+Math.PI*i/(N/2);lower.push([cy+Math.cos(a)*hr,Math.sin(a)*hr])}lower.push([right,-h]);polyUV(x,upper,sign);polyUV(x,lower,sign);cursor=right}if(cursor<yMax)rectUV(x,cursor,yMax,-h,h,sign)}
+    const yB=29.5*p.scale,yGap=8.5*p.scale,hc=R.holeY,N=Math.max(16,p.quality);
     plateSurface(0,-yB,yB,[-hc,hc],-1);plateSurface(plateX,-yB,-yGap,[-hc],1);plateSurface(plateX,yGap,yB,[hc],1);
-    const N=Math.max(16,p.quality),hr=p.holeD/2;for(const cy of[-hc,hc])for(let i=0;i<N;i++){const a0=2*Math.PI*i/N,a1=2*Math.PI*(i+1)/N,A=v(0,cy+Math.cos(a0)*hr,Math.sin(a0)*hr),B=v(plateX,cy+Math.cos(a0)*hr,Math.sin(a0)*hr),C=v(plateX,cy+Math.cos(a1)*hr,Math.sin(a1)*hr),D=v(0,cy+Math.cos(a1)*hr,Math.sin(a1)*hr);add(A,B,C);add(A,C,D)}
+    for(const cy of[-hc,hc])for(let i=0;i<N;i++){const a0=2*Math.PI*i/N,a1=2*Math.PI*(i+1)/N,A=v(0,cy+Math.cos(a0)*hr,Math.sin(a0)*hr),B=v(plateX,cy+Math.cos(a0)*hr,Math.sin(a0)*hr),C=v(plateX,cy+Math.cos(a1)*hr,Math.sin(a1)*hr),D=v(0,cy+Math.cos(a1)*hr,Math.sin(a1)*hr);add(A,B,C);add(A,C,D)}
     const flat=[];for(const f of faces)flat.push(...f);let vol=0;for(const f of faces){const[a,b,c]=f;vol+=(a[0]*(b[1]*c[2]-b[2]*c[1])+a[1]*(b[2]*c[0]-b[0]*c[2])+a[2]*(b[0]*c[1]-b[1]*c[0]))/6}return{vertices:flat,faces,triangles:faces.length,volume:Math.abs(vol),resolved:R};
   }
   function normal(a,b,c){const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2],x=uy*vz-uz*vy,y=uz*vx-ux*vz,z=ux*vy-uy*vx,l=Math.hypot(x,y,z)||1;return[x/l,y/l,z/l]}
   function fileName(options={}){const p=normalize(options),f=v=>(Math.round(v*100)/100).toString().replace('.','p');return`cr20kb-snap-fit-holder-D-${f(p.D)}-fit-${f(p.fit)}-W-${f(p.width)}.stl`}
   function binaryStl(options={}){const M=mesh(options),count=M.faces.length,buffer=new ArrayBuffer(84+count*50),dv=new DataView(buffer),head='CR20KB Snap-Fit Holder exact-profile v1';for(let i=0;i<head.length&&i<80;i++)dv.setUint8(i,head.charCodeAt(i));dv.setUint32(80,count,true);let off=84;for(const pts of M.faces){const n=normal(...pts);for(const x of[...n,...pts[0],...pts[1],...pts[2]]){dv.setFloat32(off,x,true);off+=4}dv.setUint16(off,0,true);off+=2}return{buffer,mesh:M,fileName:fileName(options)}}
-  return{REF_D,REF_HOLE_Y,REF_HOLE_D,PATH,DEFAULTS,LIMITS,normalize,profile,resolve,triangulate,mesh,fileName,binaryStl};
+  return{REF_D,REF_HOLE_Y,REF_HOLE_D,PATH,DEFAULTS,LIMITS,normalize,profile,resolve,triangulate,splitHoleEdges,mesh,fileName,binaryStl};
 });
