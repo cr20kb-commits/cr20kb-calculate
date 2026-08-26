@@ -17,9 +17,10 @@
     ['A',48.052336949495285,12.486308134874111,46.1662263369287,12.4723736889024],['A',37.02554998461909,12.901695511646468,29.7109678156766,7.4032258064516],
     ['A',28.988900529807268,6.7402346197437515,28.0385186031843,6.5],['L',9.0,6.5],['A',7.585786437626905,7.085786437626905,7.0,8.5],['L',7.0,29.5],['L',0.0,29.5]
   ]);
-  const DEFAULTS=Object.freeze({D:22.03,fit:-0.03,width:22.0,holeD:5.0,L:41.0,wall:2.5,quality:48,arcChord:.18});
+  const DEFAULTS=Object.freeze({D:22.03,fit:-0.03,width:22.0,holeD:6.5,L:41.0,wall:2.5,quality:48,arcChord:.18});
   const LIMITS=Object.freeze({D:[12,100],fit:[-2,2],width:[8,60],holeD:[3,10],L:[20,150],wall:[1.5,8],quality:[24,96],arcChord:[.08,.5]});
   const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),num=(v,f)=>Number.isFinite(Number(v))?Number(v):f,mod=a=>((a%(2*Math.PI))+2*Math.PI)%(2*Math.PI),smooth=t=>t*t*(3-2*t),ceilHalf=v=>Math.ceil(v*2-1e-9)/2;
+  function defaultHoleD(D){return num(D,DEFAULTS.D)>=20?6.5:5.0}
 
   function normalize(options={}){
     const p={...DEFAULTS,...options};
@@ -28,7 +29,8 @@
     p.clipD=Math.max(8,p.D+p.fit);
     if(Number.isFinite(Number(p.depthRatio))&&!Number.isFinite(Number(options.width)))p.width=p.clipD*Number(p.depthRatio);
     p.width=clamp(num(p.width,DEFAULTS.width),...LIMITS.width);
-    p.holeD=clamp(num(p.holeD,DEFAULTS.holeD),...LIMITS.holeD);
+    const holeRaw=(options.holeD===undefined||options.holeD===null)?defaultHoleD(p.D):options.holeD;
+    p.holeD=clamp(num(holeRaw,defaultHoleD(p.D)),...LIMITS.holeD);
     p.holeD=Math.min(p.holeD,Math.max(3,p.width-1));
     p.wall=clamp(num(p.wall,DEFAULTS.wall),...LIMITS.wall);
     const rr=Math.hypot(REF_ROOT[0]-REF_CENTER_X,REF_ROOT[1]),rn=p.clipD/2+(rr-REF_INNER_R)*(p.wall/REF_WALL);
@@ -91,6 +93,6 @@
   }
   function normal(a,b,c){const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2],x=uy*vz-uz*vy,y=uz*vx-ux*vz,z=ux*vy-uy*vx,l=Math.hypot(x,y,z)||1;return[x/l,y/l,z/l]}
   function fileName(options={}){const p=normalize(options),f=v=>(Math.round(v*100)/100).toString().replace('.','p');return`cr20kb-snap-fit-holder-D-${f(p.D)}-L-${f(p.L)}-wall-${f(p.wall)}-W-${f(p.width)}.stl`}
-  function binaryStl(options={}){const M=mesh(options),count=M.faces.length,buffer=new ArrayBuffer(84+count*50),dv=new DataView(buffer),head='CR20KB Snap-Fit Holder screw-access v1.2';for(let i=0;i<head.length&&i<80;i++)dv.setUint8(i,head.charCodeAt(i));dv.setUint32(80,count,true);let off=84;for(const pts of M.faces){const n=normal(...pts);for(const x of[...n,...pts[0],...pts[1],...pts[2]]){dv.setFloat32(off,x,true);off+=4}dv.setUint16(off,0,true);off+=2}return{buffer,mesh:M,fileName:fileName(options)}}
-  return{REF_D,REF_CENTER_X,REF_HOLE_Y,REF_HOLE_D,SCREW_TOOL_RADIUS,PATH,DEFAULTS,LIMITS,normalize,profile,resolve,triangulate,splitHoleEdges,mesh,fileName,binaryStl};
+  function binaryStl(options={}){const M=mesh(options),count=M.faces.length,buffer=new ArrayBuffer(84+count*50),dv=new DataView(buffer),head='CR20KB Snap-Fit Holder hole-default v1.3';for(let i=0;i<head.length&&i<80;i++)dv.setUint8(i,head.charCodeAt(i));dv.setUint32(80,count,true);let off=84;for(const pts of M.faces){const n=normal(...pts);for(const x of[...n,...pts[0],...pts[1],...pts[2]]){dv.setFloat32(off,x,true);off+=4}dv.setUint16(off,0,true);off+=2}return{buffer,mesh:M,fileName:fileName(options)}}
+  return{REF_D,REF_CENTER_X,REF_HOLE_Y,REF_HOLE_D,SCREW_TOOL_RADIUS,PATH,DEFAULTS,LIMITS,defaultHoleD,normalize,profile,resolve,triangulate,splitHoleEdges,mesh,fileName,binaryStl};
 });
