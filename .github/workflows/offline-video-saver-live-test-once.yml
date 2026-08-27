@@ -1,0 +1,148 @@
+name: Offline Video Saver Live Test Once
+
+on:
+  push:
+    paths:
+      - ".github/workflows/offline-video-saver-live-test-once.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  live-playlist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: offline-video-saver
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build application image
+        run: docker build -t cr20kb-offline-video-saver:live-test .
+
+      - name: Inspect playlist metadata
+        run: |
+          docker run --rm \
+            --entrypoint yt-dlp \
+            cr20kb-offline-video-saver:live-test \
+            --ignore-config \
+            --flat-playlist \
+            --playlist-end 3 \
+            --no-warnings \
+            --js-runtimes node \
+            --print '%(playlist_index)s | %(id)s | %(duration_string)s | %(title)s' \
+            'https://www.youtube.com/watch?v=Ss8lkI-7Qc8&list=PLybBpPCOgFt4IANUx-EvScY8W9mbGpGYo'
+
+      - name: Run live end-to-end job for first playlist item
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p live-data
+          chmod 0777 live-data
+
+          docker run -d \
+            --name ovs-live-test \
+            --cpus 2 \
+            --memory 4g \
+            -p 127.0.0.1:18081:8000 \
+            -e APP_ACCESS_KEY=ci-live-test \
+            -e COOKIE_SECURE=false \
+            -e MAX_PLAYLIST_ITEMS=1 \
+            -e MIN_FREE_GIGABYTES=0 \
+            -e JOB_TTL_HOURS=1 \
+            -e SCAN_TIMEOUT_SECONDS=300 \
+            -e DOWNLOAD_TIMEOUT_SECONDS=1800 \
+            -e TRANSCODE_TIMEOUT_SECONDS=2400 \
+            -v "$PWD/live-data:/data" \
+            cr20kb-offline-video-saver:live-test
+
+          cleanup() {
+            docker logs ovs-live-test || true
+            docker rm -f ovs-live-test >/dev/null 2>&1 || true
+            rm -rf live-data live-result.zip cookies.txt
+          }
+          trap cleanup EXIT
+
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:18081/healthz | grep -q '"ok":true'; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              echo "Service did not become healthy"
+              exit 1
+            fi
+            sleep 1
+          done
+
+          curl -fsS \
+            -c cookies.txt \
+            -H 'Content-Type: application/json' \
+            --data '{"key":"ci-live-test"}' \
+            http://127.0.0.1:18081/api/session \
+            >/dev/null
+
+          CREATE_RESPONSE=$(curl -fsS \
+            -b cookies.txt \
+            -H 'Content-Type: application/json' \
+            --data '{"url":"https://www.youtube.com/watch?v=Ss8lkI-7Qc8&list=PLybBpPCOgFt4IANUx-EvScY8W9mbGpGYo","profile":"tiny","rights_confirmed":true}' \
+            http://127.0.0.1:18081/api/jobs)
+
+          JOB_ID=$(python -c 'import json,sys; print(json.load(sys.stdin)["id"])' <<<"$CREATE_RESPONSE")
+          echo "Created live test job: $JOB_ID"
+
+          FINAL_STATE=""
+          for attempt in $(seq 1 240); do
+            STATE=$(curl -fsS -b cookies.txt "http://127.0.0.1:18081/api/jobs/$JOB_ID")
+            STATUS=$(python -c 'import json,sys; print(json.load(sys.stdin)["status"])' <<<"$STATE")
+            STAGE=$(python -c 'import json,sys; print(json.load(sys.stdin)["stage"])' <<<"$STATE")
+            PROGRESS=$(python -c 'import json,sys; print(round(float(json.load(sys.stdin)["progress"])*100,1))' <<<"$STATE")
+            echo "status=$STATUS stage=$STAGE progress=${PROGRESS}%"
+
+            if [ "$STATUS" = "ready" ]; then
+              FINAL_STATE="$STATE"
+              break
+            fi
+            if [ "$STATUS" = "error" ]; then
+              echo "$STATE"
+              exit 1
+            fi
+            if [ "$attempt" -eq 240 ]; then
+              echo "Live job timed out"
+              echo "$STATE"
+              exit 1
+            fi
+            sleep 10
+          done
+
+          python - <<'PY' <<<"$FINAL_STATE"
+          import json, sys
+          state = json.load(sys.stdin)
+          input_bytes = int(state["input_bytes"])
+          output_bytes = int(state["output_bytes"])
+          saved_bytes = int(state["saved_bytes"])
+          saved_percent = (saved_bytes / input_bytes * 100) if input_bytes else 0
+          print(f"title={state['title']}")
+          print(f"completed_items={state['completed_items']}")
+          print(f"input_bytes={input_bytes}")
+          print(f"output_bytes={output_bytes}")
+          print(f"saved_bytes={saved_bytes}")
+          print(f"saved_percent={saved_percent:.2f}")
+          print(f"warnings={state['warnings']}")
+          PY
+
+          curl -fsS \
+            -b cookies.txt \
+            -o live-result.zip \
+            "http://127.0.0.1:18081/api/jobs/$JOB_ID/download"
+
+          test -s live-result.zip
+          unzip -t live-result.zip
+          unzip -l live-result.zip
+
+          curl -fsS \
+            -b cookies.txt \
+            -X DELETE \
+            "http://127.0.0.1:18081/api/jobs/$JOB_ID" \
+            >/dev/null
