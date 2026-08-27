@@ -5,7 +5,7 @@ Last updated: 2026-08-27
 ## Classification
 
 - Priority: **P2**.
-- State: **pivoted to Cliply-based architecture; CR20KB custom downloader paused; draft PR #7 remains unmerged**.
+- State: **pivoted to Cliply-based architecture; waiting for the CR20KB GitHub fork; previous custom downloader paused**.
 - Previous custom branch: `feature/offline-video-saver-mvp`.
 - Previous custom pull request: `#7` in `cr20kb-commits/cr20kb-calculate`.
 
@@ -44,17 +44,20 @@ The clean CR20KB insertion point is **after `handle.promise` resolves and before
 
 ## Compact Mode MVP
 
-Recommended user-facing modes:
+Required user-facing modes:
 
 - **Original** — no re-encode.
-- **Compact 720p H.265** — default balance; target software x265/HEVC, approximately CRF/RF 29 and 64–80 kbps AAC audio.
-- **Minimum size 480p H.265** — approximately CRF/RF 31 and 64 kbps AAC audio.
+- **Compact 1080p H.265** — preserves Full HD when available; initial target software x265/HEVC around CRF/RF 28 with approximately 96 kbps AAC audio.
+- **Compact 720p H.265** — default balance; initial target software x265/HEVC around CRF/RF 29 with approximately 80 kbps AAC audio.
+- **Minimum size 480p H.265** — initial target software x265/HEVC around CRF/RF 31 with approximately 64 kbps AAC audio.
 
 Optional later mode:
 
-- **AV1 archival** — smaller files, but too slow for the default UX unless hardware and encoding time are explicitly accepted.
+- **AV1 archival** — potentially smaller files, but too slow for the default UX unless hardware and encoding time are explicitly accepted.
 
-Because Cliply already bundles FFmpeg, the first implementation should use its existing FFmpeg binary with libx265 instead of adding HandBrakeCLI as another large runtime dependency. HandBrake-specific presets are not required to achieve the storage goal.
+Because Cliply already bundles FFmpeg, the first implementation should use its existing FFmpeg binary with `libx265` instead of adding HandBrakeCLI as another large runtime dependency. HandBrake-specific presets are not required to achieve the storage goal.
+
+The 1080p mode is not allowed to upscale lower-resolution input. All compact modes preserve aspect ratio and cap, rather than force, their target height.
 
 ## Safety and data handling
 
@@ -68,15 +71,17 @@ Compact processing rules:
 6. Otherwise delete the temporary encoded file and keep the original.
 7. Use an atomic rename/move when finalizing.
 8. Preserve a clear progress stage such as `compressing` rather than pretending the download itself is still running.
+9. Preserve the original automatically when the source codec is already more efficient or the new encode does not meet the size threshold.
 
 ## Expected storage range
 
-For the validated 1:57:27 source, a reasonable first estimate is:
+For the validated 1:57:27 source, reasonable first engineering estimates are:
 
-- Compact 720p H.265: roughly **0.6–0.9 GB** depending on content complexity.
+- Compact 1080p H.265: roughly **1.1–1.8 GB** depending on motion and source codec.
+- Compact 720p H.265: roughly **0.6–0.9 GB**.
 - Minimum-size 480p H.265: roughly **0.25–0.45 GB**.
 
-These are engineering estimates, not guarantees; the first CR20KB fork test must record actual output size and elapsed time.
+These are estimates, not guarantees. If the YouTube source is already efficient AV1/VP9, the compact result may not be smaller; the keep-smaller rule must retain the original in that case.
 
 ## Licensing
 
@@ -92,13 +97,16 @@ The custom FastAPI/portable implementation remains useful only as a source of id
 - streaming ZIP;
 - Windows portable packaging experiments.
 
-It is **not** the preferred downloader base going forward. PR #7 stays draft and must not be merged as the product implementation.
+It is **not** the preferred downloader base going forward. PR #7 must not be merged as the product implementation.
 
 ## Next checkpoint
 
-1. Create a CR20KB GPL-3.0 fork/branch of Cliply.
-2. Add a `compact-transcoder` service using Cliply's existing FFmpeg binary.
-3. Insert post-processing between successful yt-dlp completion and `settleCompleted()`.
-4. Add UI selector: Original / Compact 720p / Minimum size 480p.
-5. Test first on one short video, then on the validated 1:57:27 video.
-6. Record source size, output size, elapsed encode time, CPU load and playback verification before considering playlist-wide processing.
+1. User creates the GitHub fork `cr20kb-commits/Cliply` because the connected GitHub tool can modify existing repositories but cannot create a new repository/fork.
+2. Create branch `feature/cr20kb-compact-mode-mvp` in the fork.
+3. Add a `compact-transcoder` service using Cliply's existing FFmpeg binary.
+4. Insert post-processing between successful yt-dlp completion and `settleCompleted()`.
+5. Add UI selector: Original / Compact 1080p / Compact 720p / Minimum size 480p.
+6. Add unit tests and a Windows synthetic-media smoke test.
+7. Build an unsigned Windows preview artifact.
+8. User tests when convenient: first one short video, then the validated 1:57:27 video.
+9. Record source size, output size, elapsed encode time, CPU load and playback verification before enabling playlist-wide compact processing by default.
