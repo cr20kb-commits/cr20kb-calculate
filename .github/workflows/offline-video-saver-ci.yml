@@ -30,3 +30,48 @@ jobs:
       - run: PYTHONPATH=. python -m pytest -q
       - run: node --check app/static/app.js
       - run: docker build -t cr20kb-offline-video-saver:test .
+      - name: Smoke test HandBrake H.265 path
+        run: |
+          docker run --rm --entrypoint /bin/sh cr20kb-offline-video-saver:test -ec '
+            ffmpeg -hide_banner -loglevel error \
+              -f lavfi -i testsrc2=size=320x180:rate=24 \
+              -f lavfi -i sine=frequency=1000:sample_rate=48000 \
+              -t 1 -c:v libx264 -c:a aac -y /tmp/source.mp4
+            HandBrakeCLI \
+              --input /tmp/source.mp4 \
+              --output /tmp/result.mp4 \
+              --format av_mp4 \
+              --encoder x265 \
+              --encoder-preset medium \
+              --quality 31 \
+              --maxWidth 320 \
+              --maxHeight 180 \
+              --keep-display-aspect \
+              --modulus 2 \
+              --rate 24 \
+              --pfr \
+              --audio 1 \
+              --aencoder av_aac \
+              --ab 64 \
+              --mixdown stereo \
+              --optimize \
+              --keep-metadata \
+              --no-markers \
+              >/tmp/handbrake.log 2>&1
+            test -s /tmp/result.mp4
+          '
+      - name: Smoke test web service
+        run: |
+          docker run -d --name offline-video-saver-ci \
+            -p 127.0.0.1:18080:8000 \
+            -e APP_ACCESS_KEY=ci-test \
+            cr20kb-offline-video-saver:test
+          trap 'docker logs offline-video-saver-ci || true; docker rm -f offline-video-saver-ci >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18080/healthz | grep -q '"ok":true'; then
+              curl -fsS http://127.0.0.1:18080/ | grep -q 'Offline Video Saver'
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
