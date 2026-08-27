@@ -55,7 +55,6 @@ jobs:
               --ab 64 \
               --mixdown stereo \
               --optimize \
-              --keep-metadata \
               --no-markers \
               >/tmp/handbrake.log 2>&1; then
               cat /tmp/handbrake.log
