@@ -4,6 +4,21 @@ A deliberately small self-hosted web interface for downloading a YouTube
 playlist you are entitled to save, reducing storage with HandBrakeCLI, and
 returning the result as one streaming ZIP.
 
+## Recommended deployment model
+
+Run the application on a computer, NAS, or home server that you control, then
+open its private address from a phone, tablet, or another computer on the same
+LAN or private VPN.
+
+This keeps the interface cross-device while media requests originate from the
+user-owned connection. Anonymous downloads from cloud and data-centre IP
+addresses are not reliable: YouTube may require an interactive sign-in or bot
+check even for public videos.
+
+Do not deploy a shared Google account, exported browser cookies, or user
+credentials with this public service. The project intentionally does not
+accept them.
+
 ## What v0.1 does
 
 1. Open the page on a phone, tablet, or computer.
@@ -12,40 +27,78 @@ returning the result as one streaming ZIP.
    - Compact: 720p H.265
    - Minimum space: 480p H.265
    - Compatible: 720p H.264
-4. The server processes one video at a time.
+4. The worker processes one video at a time.
 5. Compact profiles compare the HandBrake result with the downloaded source
    and keep whichever is smaller.
-6. Download one ZIP. The ZIP is streamed and is not duplicated on server disk.
+6. Download one ZIP. The ZIP is streamed and is not duplicated on worker disk.
 
 The wrapper invokes `yt-dlp`, `HandBrakeCLI`, and `ffmpeg` as separate
 processes. It does not fork or embed HandBrake source code.
 
 ## Deliberate v0.1 limits
 
-- No Google login or account playlist picker.
+- No Google account playlist picker.
 - No private playlists, cookies, browser-profile import, or DRM bypass.
 - One worker to keep CPU and temporary disk usage predictable.
 - In-memory queue; completed files remain only for the configured TTL.
-- YouTube changes can break downloads until yt-dlp is updated.
+- YouTube changes or IP reputation can prevent a download even while playlist
+  metadata remains visible.
 
-A true “choose from my YouTube account” picker belongs in a later OAuth-based
-version because it requires a Google Cloud project, redirect URI, consent
-screen, token storage policy, and privacy review. For v0.1, sharing/copying the
-playlist link is the simpler and safer cross-device flow.
+A later account picker may use Google OAuth only to list playlists. That would
+not by itself authenticate yt-dlp media downloads, so it is separate from this
+MVP.
 
 ## Run with Docker Compose
 
 ```bash
 cp .env.example .env
-# Replace APP_ACCESS_KEY and keep COOKIE_SECURE=false for plain local HTTP.
+# Replace APP_ACCESS_KEY before opening the service to another device.
 docker compose up --build -d
 ```
 
-Open `http://127.0.0.1:8787`.
+Open `http://127.0.0.1:8787` on the host computer.
 
-For a public deployment, leave the Compose port on loopback and put Caddy or
-another maintained HTTPS reverse proxy in front of it. Set
-`COOKIE_SECURE=true` when HTTPS is enabled.
+To open the UI from your own phone or tablet, set `APP_BIND_ADDRESS` in `.env`
+to the host's LAN or private-VPN address, restart Compose, and open
+`http://HOST_ADDRESS:8787`. Keep the host firewall enabled and use a strong
+access key.
+
+For HTTPS behind Caddy or another maintained reverse proxy, keep the service
+bound to loopback and set `COOKIE_SECURE=true`.
+
+## Optional PO-token provider
+
+The image includes the `bgutil-ytdlp-pot-provider` plugin, but it is inactive
+by default. An optional internal provider can be enabled with:
+
+```bash
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.pot.yml \
+  up --build -d
+```
+
+The provider port is not published outside the Compose network. This may help
+with some YouTube client requirements, but it is **not** a guaranteed solution
+for a cloud IP bot check.
+
+## Verified boundaries
+
+The automated test suite verifies:
+
+- URL and filename validation;
+- source-versus-encoded size selection;
+- streaming ZIP validity;
+- JavaScript syntax;
+- Docker image construction;
+- a real H.265 HandBrakeCLI transcode inside the image;
+- application startup and health checks.
+
+A live test on 2026-08-27 confirmed that a GitHub-hosted runner could read a
+public playlist and its titles, but YouTube rejected the actual media request
+with a sign-in/bot-check challenge. The same result occurred with the optional
+BgUtils provider running correctly. Therefore a successful cloud CI build is
+not represented as proof that anonymous cloud downloads will work.
 
 ## Configuration
 
@@ -53,6 +106,7 @@ another maintained HTTPS reverse proxy in front of it. Set
 | --- | ---: | --- |
 | `APP_ACCESS_KEY` | empty | Shared access key. Set it before network exposure. |
 | `COOKIE_SECURE` | `false` | Secure session cookie; enable behind HTTPS. |
+| `APP_BIND_ADDRESS` | `127.0.0.1` | Host address published by Docker Compose. |
 | `MAX_PLAYLIST_ITEMS` | `50` | Hard playlist item limit. |
 | `MAX_VIDEO_DURATION_SECONDS` | `14400` | Per-video duration limit. |
 | `MAX_SOURCE_MEGABYTES` | `4096` | yt-dlp source file limit. |
@@ -62,6 +116,8 @@ another maintained HTTPS reverse proxy in front of it. Set
 | `SCAN_TIMEOUT_SECONDS` | `180` | Playlist metadata timeout. |
 | `DOWNLOAD_TIMEOUT_SECONDS` | `7200` | Per-video download timeout. |
 | `TRANSCODE_TIMEOUT_SECONDS` | `21600` | Per-video HandBrake timeout. |
+| `POT_PROVIDER_URL` | empty | Optional internal BgUtils provider URL. |
+| `YOUTUBE_PLAYER_CLIENT` | `mweb` | Client selected when the provider is enabled. |
 
 ## Development
 
@@ -69,7 +125,7 @@ another maintained HTTPS reverse proxy in front of it. Set
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements-dev.txt
-pytest -q
+PYTHONPATH=. python -m pytest -q
 uvicorn app.main:app --reload
 ```
 
