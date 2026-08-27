@@ -69,5 +69,8 @@ finally {
     if (Test-Path $testDir) {
         Remove-Item -Recurse -Force $testDir
     }
-    & docker image rm -f $image 2>$null | Out-Null
+    if (Get-Command docker -ErrorAction SilentlyContinue) {
+        & docker image rm -f $image 2>$null | Out-Null
+        $global:LASTEXITCODE = 0
+    }
 }
