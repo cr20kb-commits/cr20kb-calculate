@@ -88,11 +88,6 @@ try {
     )
     $versionText | Set-Content -Path (Join-Path $packageDir "PORTABLE_VERSION.txt") -Encoding UTF8
 
-    Get-ChildItem -Path $packageDir -Directory -Recurse -Filter "__pycache__" |
-        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-    Get-ChildItem -Path $packageDir -File -Recurse -Include "*.pyc", "*.pyo" |
-        Remove-Item -Force -ErrorAction SilentlyContinue
-
     Push-Location $runtimeDir
     try {
         $env:DATA_DIR = Join-Path $packageDir "data"
@@ -104,6 +99,13 @@ try {
     finally {
         Pop-Location
     }
+
+    # The import/self-tests create bytecode caches. Remove them after testing so
+    # the distributed ZIP contains only source and runtime files that are needed.
+    Get-ChildItem -Path $packageDir -Directory -Recurse -Filter "__pycache__" |
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    Get-ChildItem -Path $packageDir -File -Recurse -Include "*.pyc", "*.pyo" |
+        Remove-Item -Force -ErrorAction SilentlyContinue
 
     Write-Host "Creating $zipPath ..."
     Compress-Archive -Path $packageDir -DestinationPath $zipPath -CompressionLevel Optimal -Force

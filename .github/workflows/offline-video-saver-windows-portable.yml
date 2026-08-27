@@ -15,7 +15,7 @@ permissions:
 jobs:
   build-windows-portable:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: offline-video-saver
@@ -62,7 +62,7 @@ jobs:
         run: |
           ./packaging/windows/build-portable.ps1 -OutputDir "$PWD/dist"
 
-      - name: Smoke test unpacked portable service on Windows
+      - name: Unpack portable and bootstrap current upstream tools
         shell: pwsh
         run: |
           $zip = Get-ChildItem "$PWD/dist/CR20KB-VideoSaver-Windows-x64.zip" | Select-Object -First 1
@@ -74,27 +74,108 @@ jobs:
           $package = Join-Path $smokeRoot "CR20KB-VideoSaver-Windows-x64"
           $runtime = Join-Path $package "runtime"
           $python = Join-Path $runtime "python.exe"
+          $launcher = Join-Path $runtime "launcher.py"
 
-          & $python (Join-Path $runtime "launcher.py") --self-test
+          & $python $launcher --self-test
           if ($LASTEXITCODE -ne 0) { throw "Portable launcher self-test failed." }
 
-          $env:DATA_DIR = Join-Path $package "data"
-          $env:APP_ACCESS_KEY = "ci-test"
-          $env:COOKIE_SECURE = "false"
-          $env:YTDLP_BIN = $env:ComSpec
-          $env:HANDBRAKE_BIN = $env:ComSpec
-          $env:FFMPEG_BIN = $env:ComSpec
-          $env:YTDLP_JS_RUNTIME = "cmd"
+          & $python $launcher --update-tools
+          if ($LASTEXITCODE -ne 0) { throw "Portable upstream tool bootstrap failed." }
+
+          $manifestPath = Join-Path $package "tools\manifest.json"
+          if (-not (Test-Path $manifestPath)) { throw "Portable tool manifest is missing." }
+          $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+          $toolPaths = @{}
+          foreach ($key in @("yt-dlp", "handbrake", "ffmpeg", "deno")) {
+            $property = $manifest.tools.PSObject.Properties[$key]
+            if (-not $property) { throw "Tool manifest has no '$key' entry." }
+            $relative = [string]$property.Value.executable
+            if (-not $relative) { throw "Tool manifest '$key' entry has no executable." }
+            $nativeRelative = $relative.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+            $fullPath = [System.IO.Path]::GetFullPath((Join-Path $package $nativeRelative))
+            if (-not (Test-Path $fullPath)) { throw "Installed '$key' executable is missing: $fullPath" }
+            $toolPaths[$key] = $fullPath
+          }
+
+          $toolDirectories = $toolPaths.Values | ForEach-Object { Split-Path $_ -Parent } | Select-Object -Unique
+          $env:PATH = (($toolDirectories + $env:PATH) -join [System.IO.Path]::PathSeparator)
+
+          & $toolPaths["yt-dlp"] --version
+          if ($LASTEXITCODE -ne 0) { throw "yt-dlp version check failed." }
+          & $toolPaths["deno"] --version
+          if ($LASTEXITCODE -ne 0) { throw "Deno version check failed." }
+          & $toolPaths["ffmpeg"] -version
+          if ($LASTEXITCODE -ne 0) { throw "FFmpeg version check failed." }
+          & $toolPaths["handbrake"] --version
+          if ($LASTEXITCODE -ne 0) { throw "HandBrakeCLI version check failed." }
+
+          $source = Join-Path $smokeRoot "source.mp4"
+          $encoded = Join-Path $smokeRoot "encoded.mp4"
+          & $toolPaths["ffmpeg"] `
+            -hide_banner -loglevel error `
+            -f lavfi -i "testsrc2=size=320x180:rate=24" `
+            -f lavfi -i "sine=frequency=1000:sample_rate=48000" `
+            -t 1 -c:v libx264 -c:a aac -y $source
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path $source)) {
+            throw "Portable FFmpeg synthetic media test failed."
+          }
+
+          & $toolPaths["handbrake"] `
+            --input $source `
+            --output $encoded `
+            --format av_mp4 `
+            --encoder x265 `
+            --encoder-preset medium `
+            --quality 31 `
+            --maxWidth 320 `
+            --maxHeight 180 `
+            --keep-display-aspect `
+            --modulus 2 `
+            --rate 24 `
+            --pfr `
+            --audio 1 `
+            --aencoder av_aac `
+            --ab 64 `
+            --mixdown stereo `
+            --optimize `
+            --no-markers
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path $encoded) -or (Get-Item $encoded).Length -le 0) {
+            throw "Portable HandBrakeCLI transcode test failed."
+          }
+
+          "CR20KB_PORTABLE_PACKAGE=$package" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "CR20KB_PORTABLE_RUNTIME=$runtime" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "CR20KB_PORTABLE_PYTHON=$python" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "CR20KB_PORTABLE_LAUNCHER=$launcher" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Smoke test full portable launcher on Windows
+        shell: pwsh
+        run: |
+          $package = $env:CR20KB_PORTABLE_PACKAGE
+          $python = $env:CR20KB_PORTABLE_PYTHON
+          $launcher = $env:CR20KB_PORTABLE_LAUNCHER
+          if (-not (Test-Path $python) -or -not (Test-Path $launcher)) {
+            throw "Portable smoke-test paths were not preserved."
+          }
+
+          Remove-Item -Force (Join-Path $package "config\server.lock") -ErrorAction SilentlyContinue
+          Remove-Item -Force (Join-Path $package "config\server.json") -ErrorAction SilentlyContinue
+          $stdoutLog = Join-Path $package "logs\ci-launcher-stdout.log"
+          $stderrLog = Join-Path $package "logs\ci-launcher-stderr.log"
 
           $process = Start-Process `
             -FilePath $python `
-            -ArgumentList @("-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "18082") `
-            -WorkingDirectory $runtime `
-            -PassThru `
-            -NoNewWindow
+            -ArgumentList @($launcher, "--mode", "local", "--port", "18082", "--no-browser") `
+            -WorkingDirectory $package `
+            -RedirectStandardOutput $stdoutLog `
+            -RedirectStandardError $stderrLog `
+            -PassThru
           try {
             $ready = $false
-            foreach ($attempt in 1..60) {
+            foreach ($attempt in 1..120) {
+              if ($process.HasExited) {
+                throw "Portable launcher exited early with code $($process.ExitCode)."
+              }
               try {
                 $health = Invoke-RestMethod -Uri "http://127.0.0.1:18082/healthz" -TimeoutSec 2
                 if ($health.ok -eq $true) {
@@ -106,7 +187,7 @@ jobs:
               }
               Start-Sleep -Milliseconds 500
             }
-            if (-not $ready) { throw "Portable web service did not become healthy on Windows." }
+            if (-not $ready) { throw "Portable launcher did not become healthy on Windows." }
             $page = Invoke-WebRequest -Uri "http://127.0.0.1:18082/" -UseBasicParsing
             if ($page.Content -notmatch "Offline Video Saver") {
               throw "Portable web UI smoke test failed."
@@ -117,6 +198,10 @@ jobs:
               Stop-Process -Id $process.Id -Force
               $process.WaitForExit()
             }
+            Write-Host "--- portable launcher stdout ---"
+            if (Test-Path $stdoutLog) { Get-Content $stdoutLog }
+            Write-Host "--- portable launcher stderr ---"
+            if (Test-Path $stderrLog) { Get-Content $stderrLog }
           }
 
       - uses: actions/upload-artifact@v4
