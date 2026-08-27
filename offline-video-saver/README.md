@@ -15,6 +15,12 @@ user-owned connection. Anonymous downloads from cloud and data-centre IP
 addresses are not reliable: YouTube may require an interactive sign-in or bot
 check even for public videos.
 
+**The worker is local-first by design. A public VPS is not a supported primary
+deployment target for YouTube media downloads.** A VPS may still host unrelated
+CR20KB infrastructure, documentation, or a future control plane, but the media
+worker should remain on a user-owned connection unless that exact host passes
+the included access diagnostic.
+
 Do not deploy a shared Google account, exported browser cookies, or user
 credentials with this public service. The project intentionally does not
 accept them.
@@ -71,7 +77,8 @@ bound to loopback and set `COOKIE_SECURE=true`.
 The rest of the pipeline is deterministic and covered by CI. The unstable part
 is whether YouTube accepts media requests from a particular public IP. These
 scripts build the real application image, download only a short sample from
-the first playlist item, verify that it is non-empty, and delete it.
+the first playlist item, verify that it is non-empty, and delete both the
+sample and temporary image.
 
 Windows PowerShell:
 
@@ -112,18 +119,27 @@ The automated test suite verifies:
 - URL and filename validation;
 - source-versus-encoded size selection;
 - streaming ZIP validity;
-- JavaScript and shell syntax;
+- JavaScript, shell, and PowerShell syntax;
 - both Docker Compose configurations;
 - Docker image construction;
 - the yt-dlp wrapper and optional plugin installation;
 - a real H.265 HandBrakeCLI transcode inside the image;
 - application startup and health checks.
 
-A live test on 2026-08-27 confirmed that a GitHub-hosted runner could read a
-public playlist and its titles, but YouTube rejected the actual media request
-with a sign-in/bot-check challenge. The same result occurred with the optional
-BgUtils provider running correctly. Therefore a successful cloud CI build is
-not represented as proof that anonymous cloud downloads will work.
+Live tests on 2026-08-27 established the deployment boundary:
+
+- a GitHub-hosted runner could read the public playlist and its titles, but
+  YouTube rejected the actual media request with a sign-in/bot-check challenge;
+- the same GitHub-hosted test with BgUtils PO-token provider `1.3.2` running
+  correctly was still rejected;
+- a separate Namecheap Ubuntu VPS test built the real image successfully but
+  received the same sign-in/bot-check rejection before any media bytes were
+  downloaded.
+
+Therefore a successful cloud CI build, readable playlist metadata, or a
+working PO-token provider is not represented as proof that anonymous cloud
+media downloads will work. The next required validation is a successful
+end-to-end test on a user-owned Windows computer, NAS, or home server.
 
 ## Configuration
 
