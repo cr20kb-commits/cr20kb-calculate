@@ -37,7 +37,7 @@ jobs:
               -f lavfi -i testsrc2=size=320x180:rate=24 \
               -f lavfi -i sine=frequency=1000:sample_rate=48000 \
               -t 1 -c:v libx264 -c:a aac -y /tmp/source.mp4
-            HandBrakeCLI \
+            if ! HandBrakeCLI \
               --input /tmp/source.mp4 \
               --output /tmp/result.mp4 \
               --format av_mp4 \
@@ -57,8 +57,14 @@ jobs:
               --optimize \
               --keep-metadata \
               --no-markers \
-              >/tmp/handbrake.log 2>&1
-            test -s /tmp/result.mp4
+              >/tmp/handbrake.log 2>&1; then
+              cat /tmp/handbrake.log
+              exit 1
+            fi
+            if ! test -s /tmp/result.mp4; then
+              cat /tmp/handbrake.log
+              exit 1
+            fi
           '
       - name: Smoke test web service
         run: |
