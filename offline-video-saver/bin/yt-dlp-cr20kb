@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+REAL_YTDLP="${YTDLP_REAL_BIN:-/usr/local/bin/yt-dlp}"
+
+if [ -n "${POT_PROVIDER_URL:-}" ]; then
+  exec "$REAL_YTDLP" \
+    --extractor-args "youtube:player_client=${YOUTUBE_PLAYER_CLIENT:-mweb}" \
+    --extractor-args "youtubepot-bgutilhttp:base_url=${POT_PROVIDER_URL}" \
+    "$@"
+fi
+
+exec "$REAL_YTDLP" "$@"
