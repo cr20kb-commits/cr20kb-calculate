@@ -1,0 +1,122 @@
+name: OPS Garden Name Tag local live smoke
+
+on:
+  push:
+    paths:
+      - '.github/workflows/garden-name-tag-local-live-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Wait for guarded CR20KB deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_SHA='e9b269cab25a06053c97c42138c54c753e8bc868'
+          for attempt in $(seq 1 18); do
+            stamp="${TARGET_SHA:0:12}-${attempt}-$(date +%s)"
+            root="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/?qa=${stamp}" 2>/dev/null || true)"
+            analytics="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/analytics-config.js?qa=${stamp}" 2>/dev/null || true)"
+            school="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/garden-v3/school-name-tag-overlay.js?qa=${stamp}" 2>/dev/null || true)"
+            info="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/build-info.json?qa=${stamp}" 2>/dev/null || true)"
+            if grep -Fq 'analytics-config.js?v=20260827-schoollocal2' <<<"$root" \
+              && grep -Fq 'school-name-tag-overlay.js?v=20260827-schoollocal2' <<<"$analytics" \
+              && grep -Fq "node.dataset.placement='local-make-v2'" <<<"$school" \
+              && grep -Fq 'const localReach=Math.min(460' <<<"$school" \
+              && grep -Fq "$TARGET_SHA" <<<"$info"; then
+                echo "NAME_TAG_LOCAL_RUNTIME_LIVE sha=$TARGET_SHA attempt=$attempt"
+                exit 0
+            fi
+            echo "attempt $attempt: Name Tag local-slot release not fully visible yet"
+            sleep 30
+          done
+          echo 'NAME_TAG_LOCAL_RUNTIME_TIMEOUT' >&2
+          exit 1
+
+      - name: Install browser driver
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund puppeteer-core@24.16.0 >/dev/null
+
+      - name: Verify local placement and direct clicks
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          CHROME="$CHROME" node <<'NODE'
+          const puppeteer=require('puppeteer-core');
+          const assert=require('node:assert/strict');
+          const origin='https://cr20kb.com';
+          const viewports=[{width:2048,height:938},{width:1600,height:900},{width:1280,height:800}];
+          const delay=ms=>new Promise(r=>setTimeout(r,ms));
+          const rectsOverlap=(a,b,gap=8)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
+          (async()=>{
+            const browser=await puppeteer.launch({executablePath:process.env.CHROME,headless:true,args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']});
+            try{
+              for(let i=0;i<viewports.length;i++){
+                const viewport=viewports[i],page=await browser.newPage();
+                await page.setViewport(viewport);
+                await page.goto(`${origin}/?lang=ru&qa=name-tag-local-${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+                await page.click('.category[data-id="make"]');
+                await page.waitForFunction(()=>new URL(location.href).searchParams.get('focus')==='make',{timeout:10000});
+                await page.waitForFunction(()=>{
+                  const e=document.querySelector('.node.product[data-id="school-tag"]');
+                  return !!e&&e.dataset.placement==='local-make-v2'&&!e.classList.contains('hidden-node')&&getComputedStyle(e).display!=='none';
+                },{timeout:10000});
+                await delay(900);
+                const metrics=await page.evaluate(()=>{
+                  const box=id=>{const e=document.querySelector(id),r=e.getBoundingClientRect();return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height,cx:r.left+r.width/2,cy:r.top+r.height/2}};
+                  const school=box('.node.product[data-id="school-tag"]');
+                  const make=box('.category[data-id="make"]');
+                  const plate=box('.node.product[data-id="plate"]');
+                  const hit=document.elementFromPoint(school.cx,school.cy)?.closest?.('.node.product')?.dataset?.id||null;
+                  const others=[...document.querySelectorAll('.node.core,.node.category,.node.product:not([data-id="school-tag"])')]
+                    .filter(e=>!e.classList.contains('hidden-node')&&getComputedStyle(e).display!=='none')
+                    .map(e=>{const r=e.getBoundingClientRect();return{id:e.dataset.id||e.id,left:r.left,top:r.top,right:r.right,bottom:r.bottom}});
+                  return{school,make,plate,hit,others,line:document.querySelector('.school-name-tag-extra-link')?.getAttribute('d')||''};
+                });
+                assert.equal(metrics.hit,'school-tag',`${viewport.width}: Name Tag centre is covered by ${metrics.hit}`);
+                assert.ok(metrics.school.cx-metrics.make.cx<=462,`${viewport.width}: Name Tag escaped Make by ${Math.round(metrics.school.cx-metrics.make.cx)} px`);
+                assert.ok(metrics.school.cx>metrics.plate.cx,`${viewport.width}: Name Tag is not in a local slot to the right of Plate Keychain`);
+                for(const other of metrics.others)assert.equal(rectsOverlap(metrics.school,other,8),false,`${viewport.width}: Name Tag overlaps ${other.id}`);
+                assert.ok(metrics.line.startsWith('M '),`${viewport.width}: Name Tag connector is missing`);
+                console.log(`LOCAL_OK ${viewport.width}x${viewport.height} make=${Math.round(metrics.make.cx)} plate=${Math.round(metrics.plate.cx)} tag=${Math.round(metrics.school.cx)} reach=${Math.round(metrics.school.cx-metrics.make.cx)}`);
+                if(i===0)await page.screenshot({path:'name-tag-2048.png',fullPage:false});
+                await page.close();
+              }
+
+              for(const [id,path] of [['school-tag','/school-name-tag/'],['plate','/plate-keychain/']]){
+                const page=await browser.newPage();
+                await page.setViewport({width:2048,height:938});
+                await page.goto(`${origin}/?lang=ru&qa=name-tag-click-${id}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+                await page.click('.category[data-id="make"]');
+                await page.waitForFunction(()=>new URL(location.href).searchParams.get('focus')==='make',{timeout:10000});
+                const selector=`.node.product[data-id="${id}"]`;
+                await page.waitForFunction(sel=>{const e=document.querySelector(sel);return !!e&&!e.classList.contains('hidden-node')&&getComputedStyle(e).display!=='none'},{timeout:10000},selector);
+                await delay(900);
+                await page.evaluate(()=>{
+                  localStorage.removeItem('__nameTagPanelAtNav');
+                  addEventListener('beforeunload',()=>localStorage.setItem('__nameTagPanelAtNav',document.getElementById('detailPanel')?.classList.contains('open')?'1':'0'),{once:true});
+                });
+                await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded',timeout:30000}),page.click(selector)]);
+                assert.equal(new URL(page.url()).pathname,path,`${id}: wrong target`);
+                assert.equal(await page.evaluate(()=>localStorage.getItem('__nameTagPanelAtNav')),'0',`${id}: detail panel opened before navigation`);
+                console.log(`CLICK_OK ${id} -> ${path}`);
+                await page.close();
+              }
+            }finally{await browser.close()}
+            console.log('NAME_TAG_LOCAL_LIVE_PASS');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Upload visual checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: garden-name-tag-local-2048
+          path: name-tag-2048.png
+          retention-days: 3
