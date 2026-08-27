@@ -54,83 +54,85 @@ jobs:
           CHROME="$CHROME" node <<'NODE'
           const puppeteer = require('puppeteer-core');
           const assert = require('node:assert/strict');
-          const origin = 'https://cr20kb.com';
-          const products = [
-            ['make','fastener','/fastener-ui/'],
-            ['make','gear-pair','/gen/gear/'],
-            ['make','plate','/plate-keychain/'],
-            ['make','optical','/optical-transfer/'],
-            ['make','crosstext','/crosstext-ui/'],
-            ['make','school-tag','/school-name-tag/'],
-            ['calculate','lifepo4','/lifepo4/'],
-            ['calculate','fuel','/fuel-range/'],
-            ['calculate','poisson','/tools/'],
-            ['calculate','life-cost','/life-cost/'],
-            ['medicine','medmemo','/medicine/'],
-            ['play','stalker','/stalker-loot/'],
-            ['play','ukhylant','/games/ukhylant/'],
-            ['play','last-card','/games/last-card/'],
-            ['play','humor','/games/engineering-humor/'],
-            ['anti','natal','/antiscience/natal-chart/'],
-            ['anti','astro-oracle','/antiscience/astro-oracle/'],
-            ['anti','myths','/antiscience/coincidence-meter/'],
-            ['anti','velvet-eye','/antiscience/velvet-eye/'],
-            ['learn','english','/english-builder/'],
-            ['learn','knowledge','/knowledge/'],
-            ['library','project-library','/library/'],
-            ['edc','knife-hrc','/edc/knives/'],
-            ['edc','s-clip','/edc/s-clip/'],
-            ['repair','vacuum','/vacuum-adapter/'],
-            ['repair','snap-fit-holder','/snap-fit-holder/']
-          ];
-          const browser = await puppeteer.launch({
-            executablePath: process.env.CHROME,
-            headless: true,
-            args: ['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']
-          });
-          try {
-            for (let i=0;i<products.length;i++) {
-              const [category,id,expectedPath] = products[i];
-              const page = await browser.newPage();
-              await page.setViewport({width:1600,height:900});
-              await page.goto(`${origin}/?lang=ru&qa=direct-${i}-${Date.now()}`, {waitUntil:'domcontentloaded', timeout:30000});
-              await page.waitForSelector(`.category[data-id="${category}"]`, {timeout:10000});
-              await page.click(`.category[data-id="${category}"]`);
-              const selector = `.node.product[data-id="${id}"]`;
-              await page.waitForFunction(sel => {
-                const el=document.querySelector(sel);
-                return !!el && !el.classList.contains('hidden-node') && getComputedStyle(el).display!=='none';
-              }, {timeout:10000}, selector);
-              await page.setRequestInterception(true);
-              let requested = null;
-              page.on('request', request => {
-                if (!requested && request.isNavigationRequest() && request.frame()===page.mainFrame() && request.url().startsWith(origin)) {
-                  requested=request.url();
-                  request.abort();
-                } else request.continue();
-              });
-              await page.click(selector);
-              await page.waitForFunction(() => window.__never_set__, {timeout:150}).catch(()=>{});
-              const started=Date.now();
-              while(!requested && Date.now()-started<5000) await new Promise(r=>setTimeout(r,25));
-              assert.ok(requested, `${id}: click did not start navigation`);
-              const actualPath = new URL(requested).pathname;
-              assert.equal(actualPath, expectedPath, `${id}: expected ${expectedPath}, got ${actualPath}`);
-              const panelOpen = await page.$eval('#detailPanel', el=>el.classList.contains('open'));
-              assert.equal(panelOpen, false, `${id}: detail panel opened before navigation`);
+          (async()=>{
+            const origin = 'https://cr20kb.com';
+            const products = [
+              ['make','fastener','/fastener-ui/'],
+              ['make','gear-pair','/gen/gear/'],
+              ['make','plate','/plate-keychain/'],
+              ['make','optical','/optical-transfer/'],
+              ['make','crosstext','/crosstext-ui/'],
+              ['make','school-tag','/school-name-tag/'],
+              ['calculate','lifepo4','/lifepo4/'],
+              ['calculate','fuel','/fuel-range/'],
+              ['calculate','poisson','/tools/'],
+              ['calculate','life-cost','/life-cost/'],
+              ['medicine','medmemo','/medicine/'],
+              ['play','stalker','/stalker-loot/'],
+              ['play','ukhylant','/games/ukhylant/'],
+              ['play','last-card','/games/last-card/'],
+              ['play','humor','/games/engineering-humor/'],
+              ['anti','natal','/antiscience/natal-chart/'],
+              ['anti','astro-oracle','/antiscience/astro-oracle/'],
+              ['anti','myths','/antiscience/coincidence-meter/'],
+              ['anti','velvet-eye','/antiscience/velvet-eye/'],
+              ['learn','english','/english-builder/'],
+              ['learn','knowledge','/knowledge/'],
+              ['library','project-library','/library/'],
+              ['edc','knife-hrc','/edc/knives/'],
+              ['edc','s-clip','/edc/s-clip/'],
+              ['repair','vacuum','/vacuum-adapter/'],
+              ['repair','snap-fit-holder','/snap-fit-holder/']
+            ];
+            const browser = await puppeteer.launch({
+              executablePath: process.env.CHROME,
+              headless: true,
+              args: ['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']
+            });
+            try {
+              for (let i=0;i<products.length;i++) {
+                const [category,id,expectedPath] = products[i];
+                const page = await browser.newPage();
+                await page.setViewport({width:1600,height:900});
+                await page.goto(`${origin}/?lang=ru&qa=direct-${i}-${Date.now()}`, {waitUntil:'domcontentloaded', timeout:30000});
+                await page.waitForSelector(`.category[data-id="${category}"]`, {timeout:10000});
+                await page.click(`.category[data-id="${category}"]`);
+                const selector = `.node.product[data-id="${id}"]`;
+                await page.waitForFunction(sel => {
+                  const el=document.querySelector(sel);
+                  return !!el && !el.classList.contains('hidden-node') && getComputedStyle(el).display!=='none';
+                }, {timeout:10000}, selector);
+                await page.setRequestInterception(true);
+                let requested = null;
+                page.on('request', request => {
+                  if (!requested && request.isNavigationRequest() && request.frame()===page.mainFrame() && request.url().startsWith(origin)) {
+                    requested=request.url();
+                    request.abort();
+                  } else request.continue();
+                });
+                await page.click(selector);
+                await new Promise(r=>setTimeout(r,180));
+                const started=Date.now();
+                while(!requested && Date.now()-started<5000) await new Promise(r=>setTimeout(r,25));
+                assert.ok(requested, `${id}: click did not start navigation`);
+                const actualPath = new URL(requested).pathname;
+                assert.equal(actualPath, expectedPath, `${id}: expected ${expectedPath}, got ${actualPath}`);
+                const panelOpen = await page.$eval('#detailPanel', el=>el.classList.contains('open'));
+                assert.equal(panelOpen, false, `${id}: detail panel opened before navigation`);
+                await page.close();
+                console.log(`DIRECT_OK ${category}/${id} -> ${actualPath}`);
+              }
+              const page=await browser.newPage();
+              await page.goto(`${origin}/?lang=ru&qa=hidden-${Date.now()}`, {waitUntil:'domcontentloaded',timeout:30000});
+              await page.click('.category[data-id="anti"]');
+              const handshakeVisible=await page.$eval('.node.product[data-id="handshake"]', el=>getComputedStyle(el).display!=='none').catch(()=>false);
+              assert.equal(handshakeVisible,false,'archived handshake product became public');
               await page.close();
-              console.log(`DIRECT_OK ${category}/${id} -> ${actualPath}`);
+            } finally {
+              await browser.close();
             }
-            const page=await browser.newPage();
-            await page.goto(`${origin}/?lang=ru&qa=hidden-${Date.now()}`, {waitUntil:'domcontentloaded',timeout:30000});
-            await page.click('.category[data-id="anti"]');
-            const handshakeVisible=await page.$eval('.node.product[data-id="handshake"]', el=>getComputedStyle(el).display!=='none').catch(()=>false);
-            assert.equal(handshakeVisible,false,'archived handshake product became public');
-            await page.close();
-          } finally {
-            await browser.close();
-          }
-          console.log(`GARDEN_DIRECT_CLICK_PASS products=${products.length}`);
+            console.log(`GARDEN_DIRECT_CLICK_PASS products=${products.length}`);
+          })().catch(error=>{console.error(error);process.exit(1)});
           NODE
 
       - name: Verify every target route returns content
