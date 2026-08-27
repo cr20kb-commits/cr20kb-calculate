@@ -23,6 +23,7 @@ image="cr20kb-offline-video-saver:host-access-test"
 
 cleanup() {
   rm -rf -- "$test_dir"
+  docker image rm -f "$image" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT HUP INT TERM
 
