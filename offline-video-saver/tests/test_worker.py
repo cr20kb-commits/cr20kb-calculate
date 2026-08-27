@@ -1,11 +1,12 @@
 from pathlib import Path
+import sys
 
 from app.config import EncodeProfile, Settings
 from app.domain import PlaylistEntry
 from app.worker import JobManager
 
 
-def settings(tmp_path: Path) -> Settings:
+def settings(tmp_path: Path, *, js_runtime: str = "node") -> Settings:
     return Settings(
         data_dir=tmp_path,
         max_playlist_items=5,
@@ -20,6 +21,7 @@ def settings(tmp_path: Path) -> Settings:
         access_key="",
         cookie_secure=False,
         ytdlp_bin="yt-dlp",
+        ytdlp_js_runtime=js_runtime,
         handbrake_bin="HandBrakeCLI",
         ffmpeg_bin="ffmpeg",
     )
@@ -117,4 +119,40 @@ def test_handbrake_failure_falls_back_to_source(tmp_path: Path, monkeypatch):
     )
     assert final.read_bytes() == b"source"
     assert warnings and "handbrake_failed_kept_source" in warnings[0]
+    manager.stop()
+
+
+def test_run_streaming_handles_carriage_return_progress(tmp_path: Path):
+    manager = JobManager(settings(tmp_path))
+    progress: list[float] = []
+    script = (
+        "import sys,time; "
+        "[(sys.stdout.write(f'Encoding: {value} %\\r'), sys.stdout.flush(), time.sleep(0.02)) "
+        "for value in (12.5, 50.0, 100.0)]"
+    )
+    manager._run_streaming(
+        [sys.executable, "-c", script],
+        timeout=10,
+        on_progress=progress.append,
+    )
+    assert progress
+    assert progress[-1] == 1.0
+    manager.stop()
+
+
+def test_scan_uses_configured_js_runtime(tmp_path: Path, monkeypatch):
+    manager = JobManager(settings(tmp_path, js_runtime="deno"))
+    captured: list[str] = []
+
+    class Result:
+        stdout = '{"title":"Playlist","entries":[]}'
+
+    def fake_run(command, timeout):
+        captured.extend(command)
+        return Result()
+
+    monkeypatch.setattr(manager, "_run", fake_run)
+    manager._scan_playlist("https://www.youtube.com/playlist?list=PL1234567890")
+    index = captured.index("--js-runtimes")
+    assert captured[index + 1] == "deno"
     manager.stop()

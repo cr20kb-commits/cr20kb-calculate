@@ -114,6 +114,7 @@ class Settings:
     access_key: str
     cookie_secure: bool
     ytdlp_bin: str
+    ytdlp_js_runtime: str
     handbrake_bin: str
     ffmpeg_bin: str
 
@@ -139,6 +140,7 @@ class Settings:
             access_key=os.getenv("APP_ACCESS_KEY", "").strip(),
             cookie_secure=_env_bool("COOKIE_SECURE", False),
             ytdlp_bin=os.getenv("YTDLP_BIN", "yt-dlp"),
+            ytdlp_js_runtime=(os.getenv("YTDLP_JS_RUNTIME", "node").strip() or "node"),
             handbrake_bin=os.getenv("HANDBRAKE_BIN", "HandBrakeCLI"),
             ffmpeg_bin=os.getenv("FFMPEG_BIN", "ffmpeg"),
         )

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+import queue
 import re
 import secrets
-import selectors
 import shutil
 import subprocess
 import threading
@@ -109,6 +109,10 @@ class JobManager:
         ):
             if shutil.which(command) is None:
                 missing.append(label)
+
+        js_runtime = self.settings.ytdlp_js_runtime.split(":", 1)[0].strip()
+        if js_runtime and shutil.which(js_runtime) is None:
+            missing.append(f"JavaScript runtime ({js_runtime})")
         return missing
 
     def _update(self, job: Job, **values: object) -> None:
@@ -257,7 +261,7 @@ class JobManager:
             "--playlist-end",
             str(limit + 1),
             "--js-runtimes",
-            "node",
+            self.settings.ytdlp_js_runtime,
             url,
         ]
         result = self._run(command, timeout=self.settings.scan_timeout_seconds)
@@ -303,7 +307,7 @@ class JobManager:
             "--concurrent-fragments",
             "4",
             "--js-runtimes",
-            "node",
+            self.settings.ytdlp_js_runtime,
             "--match-filters",
             f"!is_live & duration <=? {self.settings.max_video_duration_seconds}",
             "--max-filesize",
@@ -448,6 +452,8 @@ class JobManager:
     def _run_streaming(
         command: list[str], timeout: int, on_progress: Callable[[float], None]
     ) -> None:
+        """Run a CLI while reading progress from a pipe on Linux and Windows."""
+
         env = os.environ.copy()
         env.setdefault("LC_ALL", "C.UTF-8")
         process = subprocess.Popen(
@@ -458,14 +464,32 @@ class JobManager:
             bufsize=0,
             env=env,
         )
+        assert process.stdout is not None
+
+        chunks: "queue.Queue[bytes | BaseException | None]" = queue.Queue()
+
+        def read_output() -> None:
+            try:
+                while True:
+                    chunk = process.stdout.read(65_536)
+                    if not chunk:
+                        break
+                    chunks.put(chunk)
+            except BaseException as exc:
+                chunks.put(exc)
+            finally:
+                chunks.put(None)
+
+        reader = threading.Thread(
+            target=read_output,
+            name="tool-output-reader",
+            daemon=True,
+        )
+        reader.start()
+
         started = time.monotonic()
         tail: list[str] = []
         buffer = ""
-        assert process.stdout is not None
-        fd = process.stdout.fileno()
-        os.set_blocking(fd, False)
-        selector = selectors.DefaultSelector()
-        selector.register(fd, selectors.EVENT_READ)
 
         def consume(text: str) -> None:
             nonlocal buffer, tail
@@ -482,44 +506,46 @@ class JobManager:
                     on_progress(min(100.0, float(match.group("percent"))) / 100.0)
 
         try:
-            while True:
-                if time.monotonic() - started > timeout:
-                    process.kill()
-                    process.wait(timeout=5)
+            stream_finished = False
+            while not stream_finished:
+                elapsed = time.monotonic() - started
+                if elapsed > timeout:
                     raise ToolError("tool_timeout")
 
-                for _key, _mask in selector.select(timeout=0.25):
-                    try:
-                        chunk = os.read(fd, 65_536)
-                    except BlockingIOError:
-                        chunk = b""
-                    if chunk:
-                        consume(chunk.decode("utf-8", errors="replace"))
+                try:
+                    item = chunks.get(timeout=min(0.25, max(0.01, timeout - elapsed)))
+                except queue.Empty:
+                    continue
 
-                if process.poll() is not None:
-                    while True:
-                        try:
-                            chunk = os.read(fd, 65_536)
-                        except BlockingIOError:
-                            break
-                        if not chunk:
-                            break
-                        consume(chunk.decode("utf-8", errors="replace"))
-                    break
+                if item is None:
+                    stream_finished = True
+                elif isinstance(item, BaseException):
+                    raise ToolError(f"tool_output_failed:{item}") from item
+                else:
+                    consume(item.decode("utf-8", errors="replace"))
 
             if buffer.strip():
                 tail.append(buffer.strip())
                 match = _PERCENT_RE.search(buffer)
                 if match:
                     on_progress(min(100.0, float(match.group("percent"))) / 100.0)
+
+            remaining = max(0.1, timeout - (time.monotonic() - started))
+            try:
+                return_code = process.wait(timeout=remaining)
+            except subprocess.TimeoutExpired as exc:
+                raise ToolError("tool_timeout") from exc
         finally:
-            selector.close()
             if process.poll() is None:
                 process.kill()
-                process.wait(timeout=5)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    pass
             process.stdout.close()
+            reader.join(timeout=2)
 
-        if process.returncode != 0:
+        if return_code != 0:
             raise ToolError(f"tool_failed:{' | '.join(tail)[-1200:]}")
 
     @staticmethod

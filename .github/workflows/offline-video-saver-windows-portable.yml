@@ -1,0 +1,129 @@
+name: Offline Video Saver Windows Portable
+
+"on":
+  push:
+    branches:
+      - feature/offline-video-saver-mvp
+    paths:
+      - "offline-video-saver/**"
+      - ".github/workflows/offline-video-saver-windows-portable.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows-portable:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: offline-video-saver
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: offline-video-saver/requirements-dev.txt
+
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run Windows unit tests
+        run: python -m pytest -q
+        env:
+          PYTHONPATH: .
+
+      - name: Parse PowerShell packaging scripts
+        shell: pwsh
+        run: |
+          $paths = @(
+            "packaging/windows/build-portable.ps1",
+            "scripts/test-playlist-access.ps1"
+          )
+          foreach ($path in $paths) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $path).Path,
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | ForEach-Object { Write-Error "${path}: $($_.Message)" }
+              exit 1
+            }
+          }
+
+      - name: Build portable ZIP
+        shell: pwsh
+        run: |
+          ./packaging/windows/build-portable.ps1 -OutputDir "$PWD/dist"
+
+      - name: Smoke test unpacked portable service on Windows
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem "$PWD/dist/CR20KB-VideoSaver-Windows-x64.zip" | Select-Object -First 1
+          if (-not $zip) { throw "Portable ZIP is missing." }
+
+          $smokeRoot = Join-Path $env:RUNNER_TEMP "cr20kb-portable-smoke"
+          Remove-Item -Recurse -Force $smokeRoot -ErrorAction SilentlyContinue
+          Expand-Archive -Path $zip.FullName -DestinationPath $smokeRoot -Force
+          $package = Join-Path $smokeRoot "CR20KB-VideoSaver-Windows-x64"
+          $runtime = Join-Path $package "runtime"
+          $python = Join-Path $runtime "python.exe"
+
+          & $python (Join-Path $runtime "launcher.py") --self-test
+          if ($LASTEXITCODE -ne 0) { throw "Portable launcher self-test failed." }
+
+          $env:DATA_DIR = Join-Path $package "data"
+          $env:APP_ACCESS_KEY = "ci-test"
+          $env:COOKIE_SECURE = "false"
+          $env:YTDLP_BIN = $env:ComSpec
+          $env:HANDBRAKE_BIN = $env:ComSpec
+          $env:FFMPEG_BIN = $env:ComSpec
+          $env:YTDLP_JS_RUNTIME = "cmd"
+
+          $process = Start-Process `
+            -FilePath $python `
+            -ArgumentList @("-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "18082") `
+            -WorkingDirectory $runtime `
+            -PassThru `
+            -NoNewWindow
+          try {
+            $ready = $false
+            foreach ($attempt in 1..60) {
+              try {
+                $health = Invoke-RestMethod -Uri "http://127.0.0.1:18082/healthz" -TimeoutSec 2
+                if ($health.ok -eq $true) {
+                  $ready = $true
+                  break
+                }
+              }
+              catch {
+              }
+              Start-Sleep -Milliseconds 500
+            }
+            if (-not $ready) { throw "Portable web service did not become healthy on Windows." }
+            $page = Invoke-WebRequest -Uri "http://127.0.0.1:18082/" -UseBasicParsing
+            if ($page.Content -notmatch "Offline Video Saver") {
+              throw "Portable web UI smoke test failed."
+            }
+          }
+          finally {
+            if ($process -and -not $process.HasExited) {
+              Stop-Process -Id $process.Id -Force
+              $process.WaitForExit()
+            }
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CR20KB-VideoSaver-Windows-x64
+          path: |
+            offline-video-saver/dist/CR20KB-VideoSaver-Windows-x64.zip
+            offline-video-saver/dist/CR20KB-VideoSaver-Windows-x64.sha256
+          if-no-files-found: error
+          retention-days: 30

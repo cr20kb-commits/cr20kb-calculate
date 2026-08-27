@@ -15,15 +15,34 @@ user-owned connection. Anonymous downloads from cloud and data-centre IP
 addresses are not reliable: YouTube may require an interactive sign-in or bot
 check even for public videos.
 
-**The worker is local-first by design. A public VPS is not a supported primary
-deployment target for YouTube media downloads.** A VPS may still host unrelated
-CR20KB infrastructure, documentation, or a future control plane, but the media
-worker should remain on a user-owned connection unless that exact host passes
-the included access diagnostic.
-
 Do not deploy a shared Google account, exported browser cookies, or user
 credentials with this public service. The project intentionally does not
 accept them.
+
+## Windows portable preview
+
+The branch builds a Windows x64 portable ZIP in GitHub Actions. It is intended
+for Windows 10 22H2 and Windows 11 and does not require Docker, administrator
+rights, or a system Python installation.
+
+1. Download the `CR20KB-VideoSaver-Windows-x64` workflow artifact.
+2. Extract the ZIP completely.
+3. Double-click `START_LOCAL.cmd`.
+4. On first launch, the portable launcher downloads the current official
+   Windows releases of yt-dlp, HandBrakeCLI, FFmpeg, and Deno.
+5. Every downloaded component is checked against the SHA-256 digest returned
+   by the corresponding GitHub release API before it is installed into the
+   local `tools` folder.
+
+`START_FOR_PHONE.cmd` binds the service to the private network, generates a
+local access key, and writes the current LAN addresses to `PHONE_ACCESS.txt`.
+It should only be used on a trusted private LAN or private VPN. It does not add
+firewall rules or expose a router port.
+
+The portable ZIP contains the CR20KB application, an official Python
+embeddable runtime, and Python web dependencies. It deliberately does not
+redistribute HandBrake, FFmpeg, yt-dlp, or Deno binaries; those are obtained
+directly from their upstream releases on the user's first run.
 
 ## What v0.1 does
 
@@ -77,8 +96,7 @@ bound to loopback and set `COOKIE_SECURE=true`.
 The rest of the pipeline is deterministic and covered by CI. The unstable part
 is whether YouTube accepts media requests from a particular public IP. These
 scripts build the real application image, download only a short sample from
-the first playlist item, verify that it is non-empty, and delete both the
-sample and temporary image.
+the first playlist item, verify that it is non-empty, and delete it.
 
 Windows PowerShell:
 
@@ -120,26 +138,21 @@ The automated test suite verifies:
 - source-versus-encoded size selection;
 - streaming ZIP validity;
 - JavaScript, shell, and PowerShell syntax;
+- Linux and Windows subprocess progress handling;
 - both Docker Compose configurations;
 - Docker image construction;
 - the yt-dlp wrapper and optional plugin installation;
 - a real H.265 HandBrakeCLI transcode inside the image;
-- application startup and health checks.
+- application startup and health checks;
+- creation and unpacked smoke testing of the Windows portable ZIP.
 
-Live tests on 2026-08-27 established the deployment boundary:
-
-- a GitHub-hosted runner could read the public playlist and its titles, but
-  YouTube rejected the actual media request with a sign-in/bot-check challenge;
-- the same GitHub-hosted test with BgUtils PO-token provider `1.3.2` running
-  correctly was still rejected;
-- a separate Namecheap Ubuntu VPS test built the real image successfully but
-  received the same sign-in/bot-check rejection before any media bytes were
-  downloaded.
-
-Therefore a successful cloud CI build, readable playlist metadata, or a
-working PO-token provider is not represented as proof that anonymous cloud
-media downloads will work. The next required validation is a successful
-end-to-end test on a user-owned Windows computer, NAS, or home server.
+A live test on 2026-08-27 confirmed that a GitHub-hosted runner could read a
+public playlist and its titles, but YouTube rejected the actual media request
+with a sign-in/bot-check challenge. The same result occurred with the optional
+BgUtils provider running correctly. A separate test from the CR20KB Namecheap
+VPS produced the same rejection before media bytes were downloaded. Therefore
+a successful cloud CI build is not represented as proof that anonymous cloud
+downloads will work.
 
 ## Configuration
 
@@ -157,6 +170,7 @@ end-to-end test on a user-owned Windows computer, NAS, or home server.
 | `SCAN_TIMEOUT_SECONDS` | `180` | Playlist metadata timeout. |
 | `DOWNLOAD_TIMEOUT_SECONDS` | `7200` | Per-video download timeout. |
 | `TRANSCODE_TIMEOUT_SECONDS` | `21600` | Per-video HandBrake timeout. |
+| `YTDLP_JS_RUNTIME` | `node` | JavaScript runtime name passed to yt-dlp. |
 | `POT_PROVIDER_URL` | empty | Optional internal BgUtils provider URL. |
 | `YOUTUBE_PLAYER_CLIENT` | `mweb` | Client selected when the provider is enabled. |
 
@@ -170,8 +184,14 @@ PYTHONPATH=. python -m pytest -q
 uvicorn app.main:app --reload
 ```
 
-Local development requires `yt-dlp`, `HandBrakeCLI`, and `ffmpeg` on `PATH`
-for real jobs. Unit tests do not download media.
+Local development requires `yt-dlp`, `HandBrakeCLI`, `ffmpeg`, and the selected
+JavaScript runtime on `PATH` for real jobs. Unit tests do not download media.
+
+Build the portable Windows ZIP on Windows or a Windows GitHub runner:
+
+```powershell
+.\packaging\windows\build-portable.ps1 -OutputDir "$PWD\dist"
+```
 
 ## Storage behavior
 
