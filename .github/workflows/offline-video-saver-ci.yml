@@ -1,0 +1,116 @@
+name: Offline Video Saver CI
+
+on:
+  push:
+    paths:
+      - "offline-video-saver/**"
+      - ".github/workflows/offline-video-saver-ci.yml"
+  pull_request:
+    paths:
+      - "offline-video-saver/**"
+      - ".github/workflows/offline-video-saver-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: offline-video-saver
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: offline-video-saver/requirements-dev.txt
+      - run: python -m pip install -r requirements-dev.txt
+      - run: PYTHONPATH=. python -m pytest -q
+      - run: node --check app/static/app.js
+      - run: sh -n bin/yt-dlp-cr20kb scripts/test-playlist-access.sh
+      - name: Parse PowerShell diagnostic
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          $path = (Resolve-Path scripts/test-playlist-access.ps1).Path
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            $path,
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+      - name: Validate Compose files
+        run: |
+          cp .env.example .env
+          docker compose config >/dev/null
+          docker compose \
+            -f docker-compose.yml \
+            -f docker-compose.pot.yml \
+            config >/dev/null
+      - run: docker build -t cr20kb-offline-video-saver:test .
+      - name: Smoke test yt-dlp wrapper
+        run: |
+          docker run --rm \
+            --entrypoint /usr/local/bin/yt-dlp-cr20kb \
+            cr20kb-offline-video-saver:test \
+            --version
+          docker run --rm \
+            --entrypoint python \
+            cr20kb-offline-video-saver:test \
+            -c "import importlib.metadata as m; print(m.version('bgutil-ytdlp-pot-provider'))"
+      - name: Smoke test HandBrake H.265 path
+        run: |
+          docker run --rm --entrypoint /bin/sh cr20kb-offline-video-saver:test -ec '
+            ffmpeg -hide_banner -loglevel error \
+              -f lavfi -i testsrc2=size=320x180:rate=24 \
+              -f lavfi -i sine=frequency=1000:sample_rate=48000 \
+              -t 1 -c:v libx264 -c:a aac -y /tmp/source.mp4
+            if ! HandBrakeCLI \
+              --input /tmp/source.mp4 \
+              --output /tmp/result.mp4 \
+              --format av_mp4 \
+              --encoder x265 \
+              --encoder-preset medium \
+              --quality 31 \
+              --maxWidth 320 \
+              --maxHeight 180 \
+              --keep-display-aspect \
+              --modulus 2 \
+              --rate 24 \
+              --pfr \
+              --audio 1 \
+              --aencoder av_aac \
+              --ab 64 \
+              --mixdown stereo \
+              --optimize \
+              --no-markers \
+              >/tmp/handbrake.log 2>&1; then
+              cat /tmp/handbrake.log
+              exit 1
+            fi
+            if ! test -s /tmp/result.mp4; then
+              cat /tmp/handbrake.log
+              exit 1
+            fi
+          '
+      - name: Smoke test web service
+        run: |
+          docker run -d --name offline-video-saver-ci \
+            -p 127.0.0.1:18080:8000 \
+            -e APP_ACCESS_KEY=ci-test \
+            cr20kb-offline-video-saver:test
+          trap 'docker logs offline-video-saver-ci || true; docker rm -f offline-video-saver-ci >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18080/healthz | grep -q '"ok":true'; then
+              curl -fsS http://127.0.0.1:18080/ | grep -q 'Offline Video Saver'
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
