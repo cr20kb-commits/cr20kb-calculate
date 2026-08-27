@@ -17,7 +17,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          TARGET_SHA='179b0ce6a2b45b3d62138c9a0a558f0128086a1a'
+          TARGET_SHA='68d805b9993fe944c722b102b795596192ff9b10'
           for attempt in $(seq 1 18); do
             stamp="${TARGET_SHA:0:12}-${attempt}-$(date +%s)"
             page="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/gen/gear/?_=${stamp}" 2>/dev/null || true)"
@@ -27,24 +27,20 @@ jobs:
             loader="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/garden-v3/humor-test-overlay.js?_=${stamp}" 2>/dev/null || true)"
             root="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/?_=${stamp}" 2>/dev/null || true)"
             info="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/build-info.json?_=${stamp}" 2>/dev/null || true)"
-            if grep -Fq 'TEST v0.2' <<<"$page" \
-              && grep -Fq 'id="z1"' <<<"$page" \
-              && grep -Fq 'id="z2"' <<<"$page" \
-              && grep -Fq 'id="aFixed"' <<<"$page" \
-              && grep -Fq 'id="savePair"' <<<"$page" \
-              && grep -Fq 'function pairState' <<<"$model" \
-              && grep -Fq 'const a=(d1.d+d2.d)/2' <<<"$model" \
-              && grep -Fq "$('savePair').onclick" <<<"$app" \
+            if grep -Fq 'Шестерёночки и колёсики' <<<"$page" \
+              && grep -Fq "productName:'Spur Gear Pair'" <<<"$model" \
+              && grep -Fq "Spur Gear Pair · CR20KB" <<<"$app" \
+              && grep -Fq "ru:{title:'Шестерёночки и колёсики'" <<<"$overlay" \
+              && grep -Fq "en:{title:'Spur Gear Pair'" <<<"$overlay" \
+              && grep -Fq '/garden-v3/gear-pair-overlay.js?v=20260827-gearpairname1' <<<"$loader" \
+              && grep -Fq 'humor-test-overlay.js?v=20260827-gearpairname1' <<<"$root" \
               && grep -Fq 'data-category="make"' <<<"$overlay" \
-              && grep -Fq 'observer.disconnect()' <<<"$overlay" \
-              && grep -Fq '/garden-v3/gear-pair-overlay.js?v=20260827-gearpair1' <<<"$loader" \
-              && grep -Fq 'humor-test-overlay.js?v=20260827-gearpair1' <<<"$root" \
               && grep -Fq "$TARGET_SHA" <<<"$info"; then
-                echo "GEAR_PAIR_V02_LIVE_PASS sha=$TARGET_SHA attempt=$attempt"
+                echo "GEAR_PAIR_NAMES_LIVE_PASS sha=$TARGET_SHA attempt=$attempt"
                 exit 0
             fi
-            echo "attempt $attempt: Gear Pair v0.2 deployment not fully visible yet"
+            echo "attempt $attempt: approved Gear Pair names not fully visible yet"
             sleep 30
           done
-          echo 'GEAR_PAIR_V02_LIVE_FAIL' >&2
+          echo 'GEAR_PAIR_NAMES_LIVE_FAIL' >&2
           exit 1
