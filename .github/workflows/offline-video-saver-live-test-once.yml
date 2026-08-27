@@ -146,21 +146,23 @@ jobs:
             sleep 5
           done
 
-          python -c '
-          import json, sys
-          state = json.load(sys.stdin)
+          FINAL_STATE="$FINAL_STATE" python - <<'PY'
+          import json
+          import os
+
+          state = json.loads(os.environ["FINAL_STATE"])
           source = int(state["input_bytes"])
           result = int(state["output_bytes"])
           saved = int(state["saved_bytes"])
           percent = saved / source * 100 if source else 0
-          print(f"title={state[chr(39)+"title"+chr(39)]}")
-          print(f"completed_items={state[chr(39)+"completed_items"+chr(39)]}")
+          print(f"title={state['title']}")
+          print(f"completed_items={state['completed_items']}")
           print(f"input_bytes={source}")
           print(f"output_bytes={result}")
           print(f"saved_bytes={saved}")
           print(f"saved_percent={percent:.2f}")
-          print(f"warnings={state[chr(39)+"warnings"+chr(39)]}")
-          ' <<<"$FINAL_STATE"
+          print(f"warnings={state['warnings']}")
+          PY
 
           curl -fsS \
             -b cookies.txt \
