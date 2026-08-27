@@ -29,7 +29,22 @@ jobs:
       - run: python -m pip install -r requirements-dev.txt
       - run: PYTHONPATH=. python -m pytest -q
       - run: node --check app/static/app.js
-      - run: sh -n bin/yt-dlp-cr20kb
+      - run: sh -n bin/yt-dlp-cr20kb scripts/test-playlist-access.sh
+      - name: Parse PowerShell diagnostic
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          $path = (Resolve-Path scripts/test-playlist-access.ps1).Path
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            $path,
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
       - name: Validate Compose files
         run: |
           cp .env.example .env
