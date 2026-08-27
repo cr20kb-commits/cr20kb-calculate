@@ -66,6 +66,29 @@ access key.
 For HTTPS behind Caddy or another maintained reverse proxy, keep the service
 bound to loopback and set `COOKIE_SECURE=true`.
 
+## Test a host before deployment
+
+The rest of the pipeline is deterministic and covered by CI. The unstable part
+is whether YouTube accepts media requests from a particular public IP. These
+scripts build the real application image, download only a short sample from
+the first playlist item, verify that it is non-empty, and delete it.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\test-playlist-access.ps1 -PlaylistUrl "PLAYLIST_URL"
+```
+
+Linux or NAS shell:
+
+```bash
+chmod +x scripts/test-playlist-access.sh
+./scripts/test-playlist-access.sh "PLAYLIST_URL"
+```
+
+Use the scripts only for material you are entitled to download. They do not
+use cookies or credentials.
+
 ## Optional PO-token provider
 
 The image includes the `bgutil-ytdlp-pot-provider` plugin, but it is inactive
@@ -89,8 +112,10 @@ The automated test suite verifies:
 - URL and filename validation;
 - source-versus-encoded size selection;
 - streaming ZIP validity;
-- JavaScript syntax;
+- JavaScript and shell syntax;
+- both Docker Compose configurations;
 - Docker image construction;
+- the yt-dlp wrapper and optional plugin installation;
 - a real H.265 HandBrakeCLI transcode inside the image;
 - application startup and health checks.
 
