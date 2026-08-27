@@ -5,93 +5,100 @@ Last updated: 2026-08-27
 ## Classification
 
 - Priority: **P2**.
-- State: **active development; Windows portable preview packaged; draft pull request; not deployed; not merged**.
-- Canonical branch: `feature/offline-video-saver-mvp`.
-- Canonical pull request: `#7` in `cr20kb-commits/cr20kb-calculate`.
+- State: **pivoted to Cliply-based architecture; CR20KB custom downloader paused; draft PR #7 remains unmerged**.
+- Previous custom branch: `feature/offline-video-saver-mvp`.
+- Previous custom pull request: `#7` in `cr20kb-commits/cr20kb-calculate`.
 
 ## Product decision
 
-The project is **local-first**.
+The project remains **local-first**, but the download engine is no longer a CR20KB custom implementation.
 
-The media worker runs on a user-owned Windows computer, NAS, or home server.
-The responsive web interface may be opened from the user's other devices over
-LAN or a private VPN. A public VPS is not the primary media-worker deployment
-target.
+A live residential-Windows test on 2026-08-27 confirmed that **Cliply 0.3.6** successfully downloads YouTube media from the supplied playlist on the user's home PC. Therefore CR20KB should not duplicate Cliply's mature local yt-dlp/FFmpeg engine.
 
-## Windows portable preview
+The CR20KB value proposition is now a post-download **Compact Mode** layered on top of a working Cliply base:
 
-The branch now produces a Windows x64 portable ZIP through GitHub Actions.
+`download -> compact transcode -> verify -> compare sizes -> keep smaller file`
 
-- No Docker, administrator rights, or system Python installation is required.
-- The ZIP carries an official Python embeddable runtime and the CR20KB web app.
-- The first launch downloads yt-dlp, HandBrakeCLI, a shared FFmpeg build, and
-  Deno directly from their current official GitHub releases.
-- Each downloaded asset is checked against the SHA-256 digest returned by the
-  GitHub release API before installation.
-- `START_LOCAL.cmd` serves only the current computer.
-- `START_FOR_PHONE.cmd` enables private-LAN access with a generated key and
-  writes connection details to `PHONE_ACCESS.txt`.
-- `UPDATE_TOOLS.cmd` refreshes the external media tools.
+## Validation result
 
-The portable launcher and application subprocess reader are designed and
-unit-tested for Windows. A Windows runner builds the ZIP, unpacks it, imports
-the embedded runtime, starts the FastAPI service, and checks the health endpoint
-and web page before uploading the artifact.
+The supplied playlist was tested in two local Windows implementations:
 
-## Verified deployment boundary
+1. The CR20KB portable preview started correctly, downloaded its dependencies, opened the UI, and read the playlist, but its own Windows wrapper rejected downloaded paths with `download_path_unsafe`. This is a CR20KB implementation defect, not a YouTube residential-IP block.
+2. Cliply 0.3.6 was installed on the same home PC and successfully downloaded the media. The observed source-size estimates for a 1:57:27 video were approximately:
+   - 1080p: 2.67 GB
+   - 720p: 1.46 GB
+   - 480p: 816 MB
+   - 360p: 427 MB
 
-Live tests on 2026-08-27 used the supplied public playlist and the real
-application image.
+Conclusion: the remaining product problem is **storage size**, not reliable downloading.
 
-1. GitHub Actions read playlist metadata and titles successfully.
-2. YouTube rejected the first media request with an interactive verification
-   challenge.
-3. A second GitHub Actions run with the optional PO-token provider running
-   correctly received the same rejection.
-4. A separate test from the CR20KB Namecheap Ubuntu VPS built the image
-   successfully, but YouTube again rejected the media request before any media
-   bytes were downloaded.
+## Cliply base
 
-Conclusion: cloud/data-centre IP reputation is the blocker. It is not a
-HandBrake, FastAPI, Docker, queue, or ZIP-streaming failure.
+Cliply is an active GPL-3.0 Electron application using yt-dlp, FFmpeg and Deno. Relevant architecture already present upstream:
 
-## Verified application components
+- `src/main/services/ytdlp-engine.js` owns yt-dlp process execution, machine-readable output markers, progress, error classification, cookies and PO-token escalation.
+- `src/main/services/download-runner.js` owns the lifecycle from download start to `settleCompleted()` and exposes the final `filePath` and `fileSize`.
+- `src/main/ipc-handlers.js` connects the runner to the renderer and terminal download events.
 
-- Playlist URL validation and canonicalization.
-- One-at-a-time job processing.
-- Three HandBrake profiles.
-- Smaller-source-versus-encoded selection.
-- Streaming ZIP without a second full archive on disk.
-- Resource limits, access key, TTL cleanup, and loopback binding.
-- RU/EN responsive interface.
-- Configurable yt-dlp JavaScript runtime (`node` in Docker, `deno` in portable).
-- Cross-platform streaming progress reader for HandBrakeCLI.
-- Unit tests, JavaScript, shell, PowerShell, Compose validation, Docker build,
-  real H.265 transcode, application startup, and health endpoint.
-- Windows portable build, embedded-runtime self-test, unpacked server smoke
-  test, checksum file, and workflow artifact.
+The clean CR20KB insertion point is **after `handle.promise` resolves and before the runner emits the final completed state**. A dedicated compact-transcoder service should receive the downloaded `filePath`, transcode to a temporary output, validate it, compare sizes, atomically keep the smaller file, then return the final path to `settleCompleted()`.
 
-## v0.1 boundaries
+## Compact Mode MVP
 
-- No server-side user account credentials.
-- No browser-profile import.
-- No protected-media support.
-- No claim of reliable anonymous downloads from public cloud IPs.
-- No open public multi-user downloader.
-- Windows portable preview is currently unsigned.
+Recommended user-facing modes:
 
-## Current blocker
+- **Original** — no re-encode.
+- **Compact 720p H.265** — default balance; target software x265/HEVC, approximately CRF/RF 29 and 64–80 kbps AAC audio.
+- **Minimum size 480p H.265** — approximately CRF/RF 31 and 64 kbps AAC audio.
 
-A successful live media download and complete HandBrake/ZIP cycle has not yet
-been demonstrated from the user's residential Windows connection.
+Optional later mode:
+
+- **AV1 archival** — smaller files, but too slow for the default UX unless hardware and encoding time are explicitly accepted.
+
+Because Cliply already bundles FFmpeg, the first implementation should use its existing FFmpeg binary with libx265 instead of adding HandBrakeCLI as another large runtime dependency. HandBrake-specific presets are not required to achieve the storage goal.
+
+## Safety and data handling
+
+Compact processing rules:
+
+1. Never overwrite the source in place.
+2. Write to a temporary sibling file.
+3. Require a successful encoder exit code and a non-empty playable output.
+4. Compare source and encoded sizes.
+5. Replace the source only when the encoded file is meaningfully smaller (recommended threshold: at least 5%).
+6. Otherwise delete the temporary encoded file and keep the original.
+7. Use an atomic rename/move when finalizing.
+8. Preserve a clear progress stage such as `compressing` rather than pretending the download itself is still running.
+
+## Expected storage range
+
+For the validated 1:57:27 source, a reasonable first estimate is:
+
+- Compact 720p H.265: roughly **0.6–0.9 GB** depending on content complexity.
+- Minimum-size 480p H.265: roughly **0.25–0.45 GB**.
+
+These are engineering estimates, not guarantees; the first CR20KB fork test must record actual output size and elapsed time.
+
+## Licensing
+
+Cliply's public repository is GPL-3.0. Any public CR20KB derivative based on Cliply must preserve GPL-3.0 obligations and source availability. Do not copy Cliply code into the existing MIT wrapper as if it were MIT-licensed.
+
+## Previous CR20KB custom implementation
+
+The custom FastAPI/portable implementation remains useful only as a source of ideas and tests:
+
+- compact profiles;
+- keep-smaller logic;
+- one-at-a-time processing;
+- streaming ZIP;
+- Windows portable packaging experiments.
+
+It is **not** the preferred downloader base going forward. PR #7 stays draft and must not be merged as the product implementation.
 
 ## Next checkpoint
 
-1. Download and extract the Windows portable artifact on the user's home PC.
-2. Run `START_LOCAL.cmd` and allow the first-launch tool bootstrap to finish.
-3. Process the supplied playlist through the real web UI.
-4. Record source size, output size, processing time, CPU load, and any YouTube
-   access error.
-5. Repeat the launch on the laptop after the desktop checkpoint passes.
-6. Only then decide whether to add a signed one-click EXE/service and merge PR
-   `#7`.
+1. Create a CR20KB GPL-3.0 fork/branch of Cliply.
+2. Add a `compact-transcoder` service using Cliply's existing FFmpeg binary.
+3. Insert post-processing between successful yt-dlp completion and `settleCompleted()`.
+4. Add UI selector: Original / Compact 720p / Minimum size 480p.
+5. Test first on one short video, then on the validated 1:57:27 video.
+6. Record source size, output size, elapsed encode time, CPU load and playback verification before considering playlist-wide processing.
