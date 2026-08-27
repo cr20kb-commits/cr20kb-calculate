@@ -1,0 +1,105 @@
+name: OPS Garden direct navigation final audit
+on:
+  push:
+    paths:
+      - '.github/workflows/garden-direct-navigation-final-audit.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Verify deployed release markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_SHA='0ddeb483a1ef7ad9070c36bacff533f17eecdc46'
+          root="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/?qa=${TARGET_SHA}-$(date +%s)")"
+          app="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/garden-v3/app.js?qa=${TARGET_SHA}-$(date +%s)")"
+          info="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/build-info.json?qa=${TARGET_SHA}-$(date +%s)")"
+          grep -Fq 'app.js?v=20260827-directnav1' <<<"$root"
+          grep -Fq 'analytics-config.js?v=20260827-schoolpos1' <<<"$root"
+          grep -Fq "location.href=localizedHref(p.url)" <<<"$app"
+          grep -Fq "$TARGET_SHA" <<<"$info"
+          echo "RELEASE_OK $TARGET_SHA"
+      - name: Install browser driver
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund puppeteer-core@24.16.0 >/dev/null
+      - name: Physically click every public desktop product
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          CHROME="$CHROME" node <<'NODE'
+          const puppeteer=require('puppeteer-core');
+          const assert=require('node:assert/strict');
+          const products=[
+            ['make','fastener','/fastener-ui/'],['make','gear-pair','/gen/gear/'],['make','plate','/plate-keychain/'],['make','optical','/optical-transfer/'],['make','crosstext','/crosstext-ui/'],['make','school-tag','/school-name-tag/'],
+            ['calculate','lifepo4','/lifepo4/'],['calculate','fuel','/fuel-range/'],['calculate','poisson','/tools/'],['calculate','life-cost','/life-cost/'],
+            ['medicine','medmemo','/medicine/'],
+            ['play','stalker','/stalker-loot/'],['play','ukhylant','/games/ukhylant/'],['play','last-card','/games/last-card/'],['play','humor','/games/engineering-humor/'],
+            ['anti','natal','/antiscience/natal-chart/'],['anti','astro-oracle','/antiscience/astro-oracle/'],['anti','myths','/antiscience/coincidence-meter/'],['anti','velvet-eye','/antiscience/velvet-eye/'],
+            ['learn','english','/english-builder/'],['learn','knowledge','/knowledge/'],['library','project-library','/library/'],
+            ['edc','knife-hrc','/edc/knives/'],['edc','s-clip','/edc/s-clip/'],['repair','vacuum','/vacuum-adapter/'],['repair','snap-fit-holder','/snap-fit-holder/']
+          ];
+          const waitForPath=(page,path,timeout=30000)=>new Promise((resolve,reject)=>{
+            const timer=setTimeout(()=>{page.off('framenavigated',onFrame);reject(new Error(`timeout ${path}`))},timeout);
+            const onFrame=frame=>{if(frame!==page.mainFrame())return;let p='';try{p=new URL(frame.url()).pathname}catch(_){return}if(p!==path)return;clearTimeout(timer);page.off('framenavigated',onFrame);resolve()};
+            page.on('framenavigated',onFrame);
+          });
+          (async()=>{
+            const origin='https://cr20kb.com';
+            const browser=await puppeteer.launch({executablePath:process.env.CHROME,headless:true,args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']});
+            try{
+              for(let i=0;i<products.length;i++){
+                const [category,id,path]=products[i],page=await browser.newPage();
+                await page.setViewport({width:1600,height:900});
+                await page.goto(`${origin}/?lang=ru&qa=final-${i}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+                await page.click(`.category[data-id="${category}"]`);
+                await page.waitForFunction(cat=>new URL(location.href).searchParams.get('focus')===cat,{timeout:10000},category);
+                const selector=`.node.product[data-id="${id}"]`;
+                await page.waitForFunction(sel=>{const e=document.querySelector(sel);return !!e&&!e.classList.contains('hidden-node')&&getComputedStyle(e).display!=='none'},{timeout:10000},selector);
+                await new Promise(r=>setTimeout(r,850));
+                const hit=await page.$eval(selector,el=>{const r=el.getBoundingClientRect(),e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return e?.closest?.('.node.product')?.dataset?.id||null});
+                assert.equal(hit,id,`${id}: centre covered by ${hit}`);
+                await page.evaluate(()=>{
+                  localStorage.removeItem('__gardenDetailAtNavigation');
+                  window.__gardenDetailOpened=false;
+                  const panel=document.getElementById('detailPanel');
+                  new MutationObserver(()=>{if(panel.classList.contains('open'))window.__gardenDetailOpened=true}).observe(panel,{attributes:true,attributeFilter:['class']});
+                  addEventListener('beforeunload',()=>localStorage.setItem('__gardenDetailAtNavigation',(window.__gardenDetailOpened||panel.classList.contains('open'))?'1':'0'),{once:true});
+                });
+                const nav=waitForPath(page,path);
+                await page.click(selector);
+                await nav;
+                await page.waitForSelector('body',{timeout:10000});
+                assert.equal(new URL(page.url()).pathname,path,`${id}: wrong target`);
+                assert.equal(await page.evaluate(()=>localStorage.getItem('__gardenDetailAtNavigation')),'0',`${id}: detail panel opened`);
+                console.log(`CLICK_OK ${category}/${id} -> ${path}`);
+                await page.close();
+              }
+              const page=await browser.newPage();
+              await page.setViewport({width:1600,height:900});
+              await page.goto(`${origin}/?lang=ru&qa=hidden-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:30000});
+              await page.click('.category[data-id="anti"]');
+              await page.waitForFunction(()=>new URL(location.href).searchParams.get('focus')==='anti',{timeout:10000});
+              const visible=await page.$eval('.node.product[data-id="handshake"]',e=>getComputedStyle(e).display!=='none').catch(()=>false);
+              assert.equal(visible,false,'archived handshake became public');
+              await page.close();
+            }finally{await browser.close()}
+            console.log(`DESKTOP_CLICK_AUDIT_PASS ${products.length}`);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Verify all target routes return HTTP 200
+        shell: bash
+        run: |
+          set -euo pipefail
+          routes=(/fastener-ui/ /gen/gear/ /plate-keychain/ /optical-transfer/ /crosstext-ui/ /school-name-tag/ /lifepo4/ /fuel-range/ /tools/ /life-cost/ /medicine/ /stalker-loot/ /games/ukhylant/ /games/last-card/ /games/engineering-humor/ /antiscience/natal-chart/ /antiscience/astro-oracle/ /antiscience/coincidence-meter/ /antiscience/velvet-eye/ /english-builder/ /knowledge/ /library/ /edc/knives/ /edc/s-clip/ /vacuum-adapter/ /snap-fit-holder/)
+          for route in "${routes[@]}";do
+            code="$(curl -LsS --max-time 25 -o /dev/null -w '%{http_code}' "https://cr20kb.com${route}?qa=$(date +%s%N)")"
+            [[ "$code" == 200 ]]||{ echo "ROUTE_FAIL $route HTTP $code" >&2;exit 1;}
+            echo "ROUTE_OK $route"
+          done
+          echo "ROUTE_AUDIT_PASS ${#routes[@]}"
