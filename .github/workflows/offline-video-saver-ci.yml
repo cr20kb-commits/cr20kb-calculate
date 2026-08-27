@@ -29,7 +29,26 @@ jobs:
       - run: python -m pip install -r requirements-dev.txt
       - run: PYTHONPATH=. python -m pytest -q
       - run: node --check app/static/app.js
+      - run: sh -n bin/yt-dlp-cr20kb
+      - name: Validate Compose files
+        run: |
+          cp .env.example .env
+          docker compose config >/dev/null
+          docker compose \
+            -f docker-compose.yml \
+            -f docker-compose.pot.yml \
+            config >/dev/null
       - run: docker build -t cr20kb-offline-video-saver:test .
+      - name: Smoke test yt-dlp wrapper
+        run: |
+          docker run --rm \
+            --entrypoint /usr/local/bin/yt-dlp-cr20kb \
+            cr20kb-offline-video-saver:test \
+            --version
+          docker run --rm \
+            --entrypoint python \
+            cr20kb-offline-video-saver:test \
+            -c "import importlib.metadata as m; print(m.version('bgutil-ytdlp-pot-provider'))"
       - name: Smoke test HandBrake H.265 path
         run: |
           docker run --rm --entrypoint /bin/sh cr20kb-offline-video-saver:test -ec '
