@@ -28,6 +28,7 @@ trap cleanup EXIT HUP INT TERM
 
 rm -rf -- "$test_dir"
 mkdir -p -- "$test_dir"
+chmod 0777 "$test_dir"
 
 printf '%s\n' "Testing anonymous YouTube media access from this host."
 printf 'Only the first %s seconds of the first playlist item will be fetched.\n' "$seconds"
