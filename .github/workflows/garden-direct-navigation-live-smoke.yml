@@ -17,22 +17,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          TARGET_SHA='2a3fa22e2fb6c5fe3bcfaa5524386570dc27297a'
+          TARGET_SHA='0ddeb483a1ef7ad9070c36bacff533f17eecdc46'
           for attempt in $(seq 1 18); do
             stamp="${TARGET_SHA:0:12}-${attempt}-$(date +%s)"
             root="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/?_=${stamp}" 2>/dev/null || true)"
             app="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/garden-v3/app.js?_=${stamp}" 2>/dev/null || true)"
+            analytics="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/analytics-config.js?_=${stamp}" 2>/dev/null || true)"
+            school="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/garden-v3/school-name-tag-overlay.js?_=${stamp}" 2>/dev/null || true)"
             info="$(curl -fsS --max-time 25 -H 'Cache-Control: no-cache' "https://cr20kb.com/build-info.json?_=${stamp}" 2>/dev/null || true)"
             last_card_code="$(curl -LsS --max-time 25 -o /dev/null -w '%{http_code}' "https://cr20kb.com/games/last-card/?_=${stamp}" 2>/dev/null || true)"
             if grep -Fq 'app.js?v=20260827-directnav1' <<<"$root" \
+              && grep -Fq 'analytics-config.js?v=20260827-schoolpos1' <<<"$root" \
               && grep -Fq 'if(p.url){' <<<"$app" \
               && grep -Fq "location.href=localizedHref(p.url)" <<<"$app" \
+              && grep -Fq 'school-name-tag-overlay.js?v=20260827-schoolpos1' <<<"$analytics" \
+              && grep -Fq 'function chooseDesktopPosition' <<<"$school" \
+              && grep -Fq 'occupied.some(box=>overlaps(candidate,box))' <<<"$school" \
               && grep -Fq "$TARGET_SHA" <<<"$info" \
               && [[ "$last_card_code" == '200' ]]; then
                 echo "GARDEN_DIRECT_RUNTIME_LIVE sha=$TARGET_SHA attempt=$attempt"
                 exit 0
             fi
-            echo "attempt $attempt: direct-navigation release not fully visible yet; last-card=$last_card_code"
+            echo "attempt $attempt: direct-navigation/collision release not fully visible yet; last-card=$last_card_code"
             sleep 30
           done
           echo 'GARDEN_DIRECT_RUNTIME_TIMEOUT' >&2
