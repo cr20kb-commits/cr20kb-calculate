@@ -24,17 +24,19 @@ jobs:
             const browser=await puppeteer.launch({executablePath:process.env.CHROME,headless:true,args:['--no-sandbox','--disable-gpu']});
             const page=await browser.newPage();
             await page.setViewport({width:1600,height:900});
+            page.on('console',m=>console.log('PAGE_CONSOLE',m.text()));
             page.on('request',r=>{if(r.isNavigationRequest()&&r.frame()===page.mainFrame())console.log('NAV_REQUEST',r.url())});
             page.on('framenavigated',f=>{if(f===page.mainFrame())console.log('FRAME_NAV',f.url())});
-            await page.goto(`https://cr20kb.com/?lang=ru&qa=plate-diag-${Date.now()}`,{waitUntil:'domcontentloaded'});
+            await page.goto(`https://cr20kb.com/?lang=ru&qa=plate-diag-v2-${Date.now()}`,{waitUntil:'domcontentloaded'});
             await page.click('.category[data-id="make"]');
             await page.waitForSelector('.node.product[data-id="plate"]');
-            await new Promise(r=>setTimeout(r,700));
+            await page.evaluate(()=>document.addEventListener('click',e=>console.log('CLICK_TARGET',e.target?.closest?.('.node.product')?.dataset?.id||e.target?.id||e.target?.tagName),true));
+            await new Promise(r=>setTimeout(r,1500));
             const info=await page.evaluate(()=>{
               const ids=['plate','school-tag','gear-pair','optical','fastener','crosstext'];
               const out={};
-              for(const id of ids){const e=document.querySelector(`.node.product[data-id="${id}"]`);if(!e)continue;const r=e.getBoundingClientRect();out[id]={left:r.left,top:r.top,width:r.width,height:r.height,hidden:e.classList.contains('hidden-node'),display:getComputedStyle(e).display,z:getComputedStyle(e).zIndex};}
-              const p=document.querySelector('.node.product[data-id="plate"]');const r=p.getBoundingClientRect();const x=r.left+r.width/2,y=r.top+r.height/2;let hit=document.elementFromPoint(x,y);out.click={x,y,hitTag:hit?.tagName,hitId:hit?.closest?.('.node.product')?.dataset?.id||null,hitText:hit?.closest?.('.node.product')?.innerText||hit?.innerText||null};return out;
+              for(const id of ids){const e=document.querySelector(`.node.product[data-id="${id}"]`);if(!e)continue;const r=e.getBoundingClientRect();out[id]={left:r.left,top:r.top,width:r.width,height:r.height,hidden:e.classList.contains('hidden-node'),display:getComputedStyle(e).display,z:getComputedStyle(e).zIndex,styleLeft:e.style.left,styleTop:e.style.top};}
+              const p=document.querySelector('.node.product[data-id="plate"]');const r=p.getBoundingClientRect();const x=r.left+r.width/2,y=r.top+r.height/2;let hit=document.elementFromPoint(x,y);out.click={x,y,hitTag:hit?.tagName,hitId:hit?.closest?.('.node.product')?.dataset?.id||hit?.id||null,hitText:hit?.closest?.('.node.product')?.innerText||hit?.innerText||null};return out;
             });
             console.log('LAYOUT',JSON.stringify(info,null,2));
             await page.click('.node.product[data-id="plate"]');
