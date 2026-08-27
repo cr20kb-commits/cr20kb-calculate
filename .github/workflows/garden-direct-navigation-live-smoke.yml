@@ -104,20 +104,21 @@ jobs:
                 }, {timeout:10000}, selector);
                 await page.setRequestInterception(true);
                 let requested = null;
+                let navigationRequest = null;
                 page.on('request', request => {
-                  if (!requested && request.isNavigationRequest() && request.frame()===page.mainFrame() && request.url().startsWith(origin)) {
+                  if (!navigationRequest && request.isNavigationRequest() && request.frame()===page.mainFrame() && request.url().startsWith(origin)) {
+                    navigationRequest=request;
                     requested=request.url();
-                    request.abort();
                   } else request.continue();
                 });
                 await page.click(selector);
-                await new Promise(r=>setTimeout(r,180));
                 const started=Date.now();
-                while(!requested && Date.now()-started<5000) await new Promise(r=>setTimeout(r,25));
-                assert.ok(requested, `${id}: click did not start navigation`);
+                while(!navigationRequest && Date.now()-started<5000) await new Promise(r=>setTimeout(r,25));
+                assert.ok(navigationRequest, `${id}: click did not start navigation`);
+                const panelOpen = await page.$eval('#detailPanel', el=>el.classList.contains('open'));
+                await navigationRequest.abort();
                 const actualPath = new URL(requested).pathname;
                 assert.equal(actualPath, expectedPath, `${id}: expected ${expectedPath}, got ${actualPath}`);
-                const panelOpen = await page.$eval('#detailPanel', el=>el.classList.contains('open'));
                 assert.equal(panelOpen, false, `${id}: detail panel opened before navigation`);
                 await page.close();
                 console.log(`DIRECT_OK ${category}/${id} -> ${actualPath}`);
