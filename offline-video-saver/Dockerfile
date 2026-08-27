@@ -3,7 +3,8 @@ FROM python:3.12-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    DATA_DIR=/data
+    DATA_DIR=/data \
+    YTDLP_BIN=/usr/local/bin/yt-dlp-cr20kb
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -15,7 +16,9 @@ COPY requirements.txt ./
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
-RUN useradd --system --uid 10001 --create-home appuser \
+COPY bin/yt-dlp-cr20kb /usr/local/bin/yt-dlp-cr20kb
+RUN chmod 0555 /usr/local/bin/yt-dlp-cr20kb \
+    && useradd --system --uid 10001 --create-home appuser \
     && mkdir -p /data \
     && chown -R appuser:appuser /app /data
 
