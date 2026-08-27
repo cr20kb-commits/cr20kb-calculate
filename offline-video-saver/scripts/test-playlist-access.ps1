@@ -69,4 +69,5 @@ finally {
     if (Test-Path $testDir) {
         Remove-Item -Recurse -Force $testDir
     }
+    & docker image rm -f $image 2>$null | Out-Null
 }
