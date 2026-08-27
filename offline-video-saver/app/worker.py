@@ -381,7 +381,6 @@ class JobManager:
             "--mixdown",
             "stereo",
             "--optimize",
-            "--keep-metadata",
             "--no-markers",
         ]
 
