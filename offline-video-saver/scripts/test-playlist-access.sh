@@ -16,6 +16,24 @@ if [ "$seconds" -lt 10 ] || [ "$seconds" -gt 300 ]; then
   exit 2
 fi
 
+if docker info >/dev/null 2>&1; then
+  docker_with_sudo=0
+elif command -v sudo >/dev/null 2>&1 && sudo docker info >/dev/null; then
+  docker_with_sudo=1
+else
+  echo "Docker is installed, but this user cannot access the Docker daemon." >&2
+  echo "Run the test from an account with Docker access or sudo permission." >&2
+  exit 1
+fi
+
+docker_cli() {
+  if [ "$docker_with_sudo" -eq 1 ]; then
+    sudo docker "$@"
+  else
+    docker "$@"
+  fi
+}
+
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 project_dir=$(CDPATH= cd -- "$script_dir/.." && pwd)
 test_dir="$project_dir/.local-access-test"
@@ -23,7 +41,7 @@ image="cr20kb-offline-video-saver:host-access-test"
 
 cleanup() {
   rm -rf -- "$test_dir"
-  docker image rm -f "$image" >/dev/null 2>&1 || true
+  docker_cli image rm -f "$image" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT HUP INT TERM
 
@@ -33,11 +51,14 @@ chmod 0777 "$test_dir"
 
 printf '%s\n' "Testing anonymous YouTube media access from this host."
 printf 'Only the first %s seconds of the first playlist item will be fetched.\n' "$seconds"
+if [ "$docker_with_sudo" -eq 1 ]; then
+  printf '%s\n' "Using sudo for Docker access."
+fi
 
 cd "$project_dir"
-docker build -t "$image" .
+docker_cli build -t "$image" .
 
-docker run --rm \
+docker_cli run --rm \
   --mount "type=bind,source=$test_dir,target=/test" \
   --entrypoint /usr/local/bin/yt-dlp-cr20kb \
   "$image" \
