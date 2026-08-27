@@ -103,6 +103,7 @@ jobs:
                 await page.goto(`${origin}/?lang=ru&qa=direct-${i}-${Date.now()}`, {waitUntil:'domcontentloaded', timeout:30000});
                 await page.waitForSelector(`.category[data-id="${category}"]`, {timeout:10000});
                 await page.click(`.category[data-id="${category}"]`);
+                await page.waitForFunction(cat=>new URL(location.href).searchParams.get('focus')===cat,{timeout:10000},category);
                 const selector = `.node.product[data-id="${id}"]`;
                 await page.waitForFunction(sel => {
                   const el=document.querySelector(sel);
@@ -129,6 +130,7 @@ jobs:
               const page=await browser.newPage();
               await page.goto(`${origin}/?lang=ru&qa=hidden-${Date.now()}`, {waitUntil:'domcontentloaded',timeout:30000});
               await page.click('.category[data-id="anti"]');
+              await page.waitForFunction(()=>new URL(location.href).searchParams.get('focus')==='anti',{timeout:10000});
               const handshakeVisible=await page.$eval('.node.product[data-id="handshake"]', el=>getComputedStyle(el).display!=='none').catch(()=>false);
               assert.equal(handshakeVisible,false,'archived handshake product became public');
               await page.close();
