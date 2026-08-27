@@ -1,0 +1,32 @@
+name: Offline Video Saver CI
+
+on:
+  push:
+    paths:
+      - "offline-video-saver/**"
+      - ".github/workflows/offline-video-saver-ci.yml"
+  pull_request:
+    paths:
+      - "offline-video-saver/**"
+      - ".github/workflows/offline-video-saver-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: offline-video-saver
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: offline-video-saver/requirements-dev.txt
+      - run: python -m pip install -r requirements-dev.txt
+      - run: pytest -q
+      - run: node --check app/static/app.js
+      - run: docker build -t cr20kb-offline-video-saver:test .
