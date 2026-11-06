@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Codex, Git, права, Sites, API, MCP, автоматизация и проверка выпуска.">
+<meta name="theme-color" content="#eef1ee">
+<meta name="cr20kb-edition" content="1.0.0">
+<meta name="cr20kb-verified" content="2026-11-06">
+<link rel="canonical" href="https://cr20kb.com/utilities/chatgpt-handbook/pro.html">
+<title>ChatGPT в деле · Профи | CR20KB</title>
+<style>:root{--accent:#81552b}
+*{box-sizing:border-box}
+:root{color-scheme:light;--paper:#fff;--surface:#eef1ee;--ink:#18251e;--muted:#48594e;--line:#d9e2d9}
+body{margin:0;background:var(--surface);color:var(--ink);font:17px/1.6 system-ui,'Segoe UI',sans-serif}
+a{color:var(--accent);text-underline-offset:.16em}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+main{width:min(100% - 32px,920px);margin:auto;padding:20px 0 48px}
+.top,.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top{justify-content:space-between;margin-bottom:18px;font-size:.9rem}
+.top a{font-weight:650}
+.cover,.chapter,.card{background:var(--paper);border:1px solid var(--line);border-radius:17px}
+.cover,.chapter{padding:clamp(18px,4vw,42px);margin-bottom:16px}
+.cover{border-top:5px solid var(--accent)}
+.kicker,.label{font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(2.2rem,7vw,4.15rem);line-height:1.02;letter-spacing:-.045em;margin:.25em 0}
+h2{font-size:clamp(1.45rem,4.5vw,2rem);line-height:1.16;margin:.2em 0 .65em}
+h3{font-size:1.1em;line-height:1.2;margin:1.1em 0 .45em}
+p,ul,ol{margin-bottom:.9em}
+.lead{font-size:1.23em;line-height:1.38;max-width:36rem}
+.meta,.muted,footer{color:var(--muted);font-size:.9em}
+.cover figure{max-width:660px;margin:20px 0}
+.cover svg{display:block;width:100%;height:auto}
+figcaption{font-size:.84em;color:var(--muted);margin-top:8px}
+.toc{margin-top:20px;border-top:1px solid var(--line);padding-top:12px}
+.toc ol{margin-top:6px;padding-left:1.45em}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.chapter{scroll-margin-top:12px}
+pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font:inherit}
+code{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;font-size:.92em}
+pre code{font:inherit}
+.snippet{position:relative;background:#f2f6f2;border-left:3px solid var(--accent);border-radius:0 9px 9px 0;padding:12px 15px;margin:0 0 1em}
+.copy{margin-top:9px;background:white;border:1px solid var(--line);border-radius:7px;padding:4px 9px;color:var(--accent);font:inherit;font-size:.79em;font-weight:700;cursor:pointer}
+table{border-collapse:collapse;width:100%;table-layout:fixed;margin:.45em 0 1.1em;font-size:.91em}
+th,td{padding:7px 9px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{background:#edf3ee;color:var(--ink)}
+.button{display:inline-block;background:var(--accent);color:white;text-decoration:none;font-weight:700;border-radius:8px;padding:7px 12px}
+.secondary{background:white;border:1px solid var(--line);color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.card{padding:18px;display:flex;flex-direction:column;border-top:4px solid var(--accent)}
+.card h2{font-size:1.42rem}
+.card .actions{margin-top:auto}
+.card .button{font-size:.89em}
+footer{border-top:1px solid var(--line);padding:14px 0}
+@media(max-width:690px){.cards{grid-template-columns:1fr}.top{justify-content:flex-start}}
+@page{size:A4;margin:16mm 17mm 17mm}
+@media print{
+  body{background:white;font-size:11.5pt;line-height:1.45}
+  main{width:auto;margin:0;padding:0}
+  .screen-only,button,footer{display:none!important}
+  .cover,.chapter{border:0;border-radius:0;padding:0;margin:0}
+  .cover{padding-top:7mm;border-top:4pt solid var(--accent)}
+  .chapter{break-before:page;padding-top:3mm}
+  .chapter h2{margin-top:3mm}
+  h1{font-size:36pt}
+  h2{font-size:23pt}
+  h3{break-after:avoid}
+  table,.snippet,figure{break-inside:avoid}
+  .cover figure{margin:10mm 0}
+  .toc{margin-top:7mm}
+  a{text-decoration:none}
+}
+</style>
+</head><body><main>
+
+<nav class="top screen-only" aria-label="Навигация по книге"><a href="./index.html">← Все редакции</a>
+<a href="./CR20KB_ChatGPT_Handbook_pro.pdf">Скачать PDF</a></nav>
+<header class="cover">
+<p class="kicker">CR20KB · Руководство по эксплуатации · 03</p>
+<h1>ChatGPT<br>в деле</h1>
+<p class="lead"><strong>Профи</strong><br>Разработка и эксплуатация рабочих процессов</p>
+
+<figure><svg viewBox="0 0 640 240" role="img" aria-labelledby="graphic-title graphic-desc">
+<title id="graphic-title">Три способа работы с ChatGPT</title>
+<desc id="graphic-desc">Три карточки изображают диалог, рабочий документ и среду разработки.</desc>
+<rect width="640" height="240" rx="18" fill="#183328"/>
+<path d="M28 120h584" stroke="#375d4c" stroke-width="2" stroke-dasharray="5 9"/>
+<rect x="46" y="46" width="156" height="148" rx="16" fill="#d8e8d4"/>
+<rect x="242" y="46" width="156" height="148" rx="16" fill="#d8e6ec"/>
+<rect x="438" y="46" width="156" height="148" rx="16" fill="#ecdfcb"/>
+<path d="M83 83h82a9 9 0 0 1 9 9v39a9 9 0 0 1-9 9h-48l-24 18v-18H83a9 9 0 0 1-9-9V92a9 9 0 0 1 9-9z" fill="#317659"/>
+<circle cx="102" cy="112" r="4" fill="#fff"/><circle cx="124" cy="112" r="4" fill="#fff"/><circle cx="146" cy="112" r="4" fill="#fff"/>
+<path d="M287 73h47l19 19v73h-66z" fill="#225c83"/><path d="M334 73v20h19m-51 17h34m-34 15h34m-34 15h23" fill="none" stroke="#edf5f8" stroke-width="4" stroke-linecap="round"/>
+<rect x="470" y="83" width="92" height="74" rx="8" fill="#81552b"/>
+<path d="M470 100h92m-69 14 11 9-11 9m20 2h22" fill="none" stroke="#fff4e4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#fff4e4"><circle cx="482" cy="92" r="2"/><circle cx="491" cy="92" r="2"/><circle cx="500" cy="92" r="2"/></g>
+</svg><figcaption>Диалог, готовый результат и разработка. Выбирай способ работы по задаче.</figcaption></figure>
+
+<p class="meta">Текст и примеры — ChatGPT для CR20KB<br>Версия 1.0.0 · Источники сверены 6 ноября 2026</p>
+<nav class="toc" aria-label="Оглавление"><strong>Оглавление</strong><ol><li><a href="#architecture">Архитектура работы и границы доступа</a></li><li><a href="#brief">Техническое задание и критерии приёмки</a></li><li><a href="#knowledge">Контекст, знания и правила проекта</a></li><li><a href="#research">Исследование с проверяемой цепочкой</a></li><li><a href="#analysis">Данные, расчёты и контроль происхождения</a></li><li><a href="#artifacts">Артефакты и контроль публикации</a></li><li><a href="#codex">Код и Git от диагностики до PR</a></li><li><a href="#sites">Сайты, интерактивные инструменты и выпуск</a></li><li><a href="#tools">Действия в приложениях и браузере</a></li><li><a href="#skills">Повторяемые процессы, Skills и MCP</a></li><li><a href="#automation">Автоматизация и длительная работа</a></li><li><a href="#api">API, когда результат нужен в программе</a></li><li><a href="#evaluation">Проверка агента, модели и рабочего процесса</a></li><li><a href="#security">Безопасность данных и эксплуатация в команде</a></li><li><a href="#release">Чек-лист технического выпуска</a></li></ol></nav>
+</header>
+<section class="chapter" id="architecture">
+<h2>Архитектура работы и границы доступа</h2>
+<p>Выбирай среду по тому, где находятся данные, какие операции разрешены
+и как ты примешь результат. ChatGPT в чате помогает формулировать,
+исследовать и принимать решения. Work подходит для задач с файлами,
+подключёнными сервисами и проверяемыми результатами. Codex даёт
+разработчику доступ к рабочей копии, командам и diff в выбранной среде.
+API нужен, когда свой продукт должен вызывать модель программно.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Сценарий</th>
+<th>Рабочая поверхность</th>
+<th>Что проверить</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Сопоставить 3 спецификации и собрать отчёт</td>
+<td>Work с файлами</td>
+<td>Источники, формулы, экспорт</td>
+</tr>
+<tr class="even">
+<td>Исправить регрессию в проекте</td>
+<td>Codex в CLI, IDE или облаке</td>
+<td>Базовая ветка, тест, diff</td>
+</tr>
+<tr class="odd">
+<td>Изменить запись в сервисе</td>
+<td>Подключённое приложение или браузер</td>
+<td>Аккаунт, разрешение, состояние после операции</td>
+</tr>
+<tr class="even">
+<td>Встроить анализ в своё приложение</td>
+<td>API</td>
+<td>Схема ответа, стоимость, таймауты и журнал</td>
+</tr>
+<tr class="odd">
+<td>Выполнять сверку по расписанию</td>
+<td>Задача по расписанию</td>
+<td>Время, источники, среда и повторный запуск</td>
+</tr>
+</tbody>
+</table>
+<p>Названия моделей, квоты и набор действий меняются. Смотри, что
+реально доступно в выбранной среде. Опиши требование к результату
+независимо от названия режима. <a
+href="https://learn.chatgpt.com/docs/use-chatgpt">Выбор рабочей
+поверхности</a> · <a
+href="https://learn.chatgpt.com/docs/cloud">Облачный Codex</a>.</p>
+</section>
+<section class="chapter" id="brief">
+<h2>Техническое задание и критерии приёмки</h2>
+<p>Раздели входные данные, решение и доказательство. Назови точные
+версии файлов и правило разрешения расхождений. На этапе приёмки нужны
+признаки, которые можно наблюдать. Для P0-рисков сначала проверь
+последствия и предложи обратимый способ работы.</p>
+<div class="snippet"><pre class="text"><code>Цель — выпустить автономный каталог КД для Windows.
+Источники — текущий main и обезличенный набор файлов для испытаний.
+Результат — архив, который открывает каталог двойным щелчком без сети.
+Сохрани существующие фильтры и порядок сортировки. Не меняй продакшен.
+Приёмка — открытие после чистой распаковки, три проверенных поиска,
+неизменность исходных файлов и отчёт с шагами воспроизведения.</code></pre></div>
+<p>В большой задаче поставь промежуточный результат, например рабочий
+прототип без публикации. До отправки или выпуска проверь адрес,
+аудиторию и разрешение. При блокере попроси зафиксировать, на каком шаге
+он возник, какой ответ вернул инструмент и что можно завершить
+независимо.</p>
+</section>
+<section class="chapter" id="knowledge">
+<h2>Контекст, знания и правила проекта</h2>
+<p>В длинной работе веди каноническую запись. Для программного проекта
+источником служит репозиторий, для рабочей инструкции — утверждённый
+файл, для действий — реестр и подтверждения сервисов. Чат полезен для
+обсуждения, но новую сессию начинай с ссылки на актуальную версию. В
+проекте можно хранить файлы, чаты и правила. В доступном клиенте Library
+позволяет снова находить сохранённые файлы, а рабочая папка задаёт среду
+исполнения кода.</p>
+<div class="snippet"><pre class="text"><code>Открой актуальный README и последнюю запись журнала проекта.
+Покажи, какое состояние подтверждено, какие решения ещё действуют
+и какая одна задача разблокирует дальнейшую работу.
+Если данные расходятся, перечисли версии и предложи способ сверки.</code></pre></div>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Что нужно закрепить</th>
+<th>Где хранить</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Личные предпочтения</td>
+<td>Персонализация или память, если доступна</td>
+</tr>
+<tr class="even">
+<td>Контекст темы и допустимые источники</td>
+<td>Проект и его инструкции</td>
+</tr>
+<tr class="odd">
+<td>Правила разработки</td>
+<td>Версионируемый файл правил репозитория, например AGENTS.md</td>
+</tr>
+<tr class="even">
+<td>Повторяемая процедура</td>
+<td>Skill с входами, шагами и критериями проверки</td>
+</tr>
+<tr class="odd">
+<td>Состояние процессов и выпусков</td>
+<td>Реестр, журнал решений, ссылки на артефакты</td>
+</tr>
+</tbody>
+</table>
+<p>Для новых специализированных процессов проверь доступность проектов,
+skills и workspace agents. По справке на дату сверки личные аккаунты
+могут использовать существующие GPT, а создание новых GPT для личных
+аккаунтов закрыто. В управляемом рабочем пространстве проверяй
+доступность, настройки и свои права. <a
+href="https://help.openai.com/en/articles/10169521-projects-in-chatgpt">Проекты</a>
+· <a
+href="https://help.openai.com/en/articles/8590148-memory-in-chatgpt">Память</a>
+· <a
+href="https://learn.chatgpt.com/docs/agent-configuration/agents-md">Правила
+AGENTS.md</a> · <a
+href="https://learn.chatgpt.com/docs/skills-and-plugins">Skills и
+плагины</a> · <a
+href="https://help.openai.com/en/articles/8554397-creating-and-editing-gpts">GPTs</a>.</p>
+</section>
+<section class="chapter" id="research">
+<h2>Исследование с проверяемой цепочкой</h2>
+<p>Начни с вопроса и порога доказательности. Для продукта зафиксируй
+версию и регион, для нормы — юрисдикцию и дату, для числового сравнения
+— единицы и период. Официальная публикация подтверждает только то, что в
+ней сказано. Для спорных фактов желательно отдельно проверить источник,
+дату и контрпример.</p>
+<div class="snippet"><pre class="text"><code>Проверь, какие параметры поддерживает текущая версия API для моей задачи.
+Приоритет — официальная документация и журнал изменений.
+Составь таблицу «утверждение / источник / дата / применимость».
+Отдельно выпиши расхождения между общим гайдом и точным эндпоинтом.
+Отметь, какие параметры подтверждены документацией, а какие проверены запуском.</code></pre></div>
+<p><strong>Практика при расхождениях.</strong> Раздели подтверждённый
+факт, вывод из источника и предположение. Вынеси ссылки к тем
+утверждениям, которые они поддерживают. Для затрат или технической
+возможности сохрани дату и условия проверки. В Deep research, если
+доступен, можно выбрать допустимые источники и проверить план до
+запуска. <a
+href="https://help.openai.com/en/articles/10500283-deep-research-in-chatgpt">Deep
+research</a>.</p>
+</section>
+<section class="chapter" id="analysis">
+<h2>Данные, расчёты и контроль происхождения</h2>
+<p>Зафиксируй входы, версии, единицы, правила пропусков и этапы
+обработки. Для повторяемого расчёта нужны исходная таблица,
+преобразования, формулы или код, итог и тест на маленьком примере.
+Отдельно проверь пустые значения, дубли, разные валюты, округление и
+даты. Детерминированный расчёт можно повторить независимо от текста
+ответа.</p>
+<div class="snippet"><pre class="text"><code>Сверь два BOM по ключу «обозначение + ревизия». Сохрани исходные листы.
+Разнеси изменения на новые, удалённые и изменившиеся позиции.
+Не подставляй ноль вместо пустого количества. Выведи неоднозначные дубли.
+Дай XLSX, правила сопоставления и контрольное равенство количества строк.
+На трёх известных позициях покажи ручную сверку.</code></pre></div>
+<p>Проверяй число принятых строк плюс исключения. Для диаграммы сверь
+источник значений и шкалы. При численном расчёте укажи область
+применимости формулы, входные единицы и оценку чувствительности.
+Сравнение изображений чертежей полезно для визуальной проверки, а
+приёмку размеров и допусков делай по исходной КД. <a
+href="https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview">Анализ
+данных и загрузки</a>.</p>
+</section>
+<section class="chapter" id="artifacts">
+<h2>Артефакты и контроль публикации</h2>
+<p>Сразу задай формат и способ просмотра. PDF проверяй после рендера,
+таблицу — открытием и пересчётом, слайды — в режиме показа. Для
+итогового набора сохрани редактируемые источники, готовые экспорты,
+версию и дату. Для сайта и архива удобно собирать выходы из одного
+источника. Пример — PDF и HTML из одной рукописи.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Результат</th>
+<th>Приёмка</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DOCX или PDF</td>
+<td>Структура, переносы, ссылки, просмотр трудных страниц</td>
+</tr>
+<tr class="even">
+<td>XLSX</td>
+<td>Формулы, типы ячеек, сверка контрольных значений</td>
+</tr>
+<tr class="odd">
+<td>Слайды</td>
+<td>Читаемость с целевого экрана, графики и порядок</td>
+</tr>
+<tr class="even">
+<td>Изображения и видео</td>
+<td>Геометрия, текст, права на исходник, контроль экспорта</td>
+</tr>
+<tr class="odd">
+<td>Архив</td>
+<td>Распаковка в чистую папку, запуск, список файлов</td>
+</tr>
+</tbody>
+</table>
+<p>Для изображения точность геометрии проверяй по утверждённому
+исходнику. Для презентации числовой график должен исходить из данных.
+Для видео проверь озвучку и синхронность титров. <a
+href="https://learn.chatgpt.com/docs/use-chatgpt">Создание артефактов в
+Work</a> · <a href="https://cr20kb.com/utilities/chatgpt-images/">Книга
+CR20KB по изображениям</a>.</p>
+</section>
+<section class="chapter" id="codex">
+<h2>Код и Git от диагностики до PR</h2>
+<p>Начинай с чистого понимания рабочего состояния. Назови репозиторий,
+ветку и команду воспроизведения. Перед правкой попроси изучить правила
+репозитория и сохранить чужие изменения. Для параллельных работ
+отдельная ветка или worktree помогает изолировать diff. Выбери локальную
+или облачную среду с нужными зависимостями и правами.</p>
+<div class="snippet"><pre class="text"><code>В репозитории каталога воспроизведи сбой импорта CSV с пустой ценой.
+Начни с правил проекта и текущего git status. Исправь обработку только в импорте.
+Проверь старый формат, пустую цену и корректное число. Выполни штатный тест.
+Покажи файлы, команды и результат. Если тест не запустился, укажи почему.
+Подготовь отдельную ветку и PR в main, если GitHub доступен.</code></pre></div>
+<p>До слияния посмотри diff, результаты тестов и рабочий сценарий. Для
+ревью попроси перечислить дефекты с файлом, строкой, примером входа и
+последствиями. При отсутствии проблемы пусть явно укажет проверенные
+области и непокрытые сценарии. После слияния проверь целевую ветку и
+развёртывание отдельно. <a
+href="https://learn.chatgpt.com/docs/cloud">Codex Cloud</a> · <a
+href="https://learn.chatgpt.com/docs/agent-configuration/agents-md">Правила
+проекта</a>.</p>
+</section>
+<section class="chapter" id="sites">
+<h2>Сайты, интерактивные инструменты и выпуск</h2>
+<p>Статическая страница подходит для инструкции, калькулятора без
+сервера или прототипа с локальными данными. Хостинг и приложение с
+аккаунтами добавляют требования к доступу, данным и выпуску. Sites, если
+доступен, предоставляет свой цикл создания и публикации. Для своего
+хостинга используй штатный деплой проекта.</p>
+<div class="snippet"><pre class="text"><code>Собери автономную страницу сравнения вариантов из приложенных данных.
+Проверь 360 и 1280 пикселей, клавиатуру, пустой ввод и ошибочные числа.
+Проверь файл без сети. Для сайта используй отдельную ветку и штатный деплой.
+После публикации открой фактический URL и проверь версию и загрузку.</code></pre></div>
+<p>Три контрольные точки — локальный результат, принятый коммит и
+работающий публичный URL. Перед публикацией проверь видимость, ссылки,
+формат и загрузки. Если важны офлайн-сценарии, проверь первый запуск на
+чистом устройстве или профиле при выключенной сети. <a
+href="https://learn.chatgpt.com/docs/sites">Sites</a>.</p>
+</section>
+<section class="chapter" id="tools">
+<h2>Действия в приложениях и браузере</h2>
+<p>Подключённое приложение или инструмент даёт только заявленные
+операции и права текущего аккаунта. Поиск и черновик удобны для
+предварительной сверки. Для отправки, публикации, изменения доступа и
+удаления точно укажи объект, аудиторию и пределы действия. Внешний
+документ или страница — данные для анализа. Команда внутри страницы сама
+по себе прав на действие не даёт.</p>
+<div class="snippet"><pre class="text"><code>В подключённом календаре найди событие «Сверка проекта» на этой неделе.
+Сверь владельца, время Europe/Kyiv и участников. Покажи ссылку.
+Если обнаружится два одноимённых события, перечисли их и остановись.</code></pre></div>
+<p>Схема проверки проста. Разреши объект по стабильному ID, прочитай
+текущее состояние, выполни разрешённую операцию, прочитай результат. Для
+повторов учитывай риск дубля. Для браузера различай локальный и облачный
+сеанс, проверь разрешение на сайт и фактический аккаунт. Используй
+данные, которые нужны операции. <a
+href="https://help.openai.com/en/articles/11487775-connected-apps-in-chatgpt">Подключённые
+приложения</a> · <a
+href="https://learn.chatgpt.com/docs/browser">Браузер</a> · <a
+href="https://learn.chatgpt.com/docs/permission-modes">Права</a>.</p>
+</section>
+<section class="chapter" id="skills">
+<h2>Повторяемые процессы, Skills и MCP</h2>
+<p>Skill описывает повторяемый способ работы. Напиши, когда его
+применять, что считать входом, где искать правду и чем проверять выход.
+Плагин может объединять инструкции с инструментами. MCP задаёт способ
+предоставить модели инструменты и ресурсы, если нужный сервер подключён.
+Роль инструмента, требования к доступу и действие подтверждай
+отдельно.</p>
+<div class="snippet"><pre class="text"><code>Опиши процедуру сверки инструкции. Входы — URL официальных страниц,
+Markdown текущей книги и опубликованные версии. Сначала найди изменения.
+Классифицируй их по влиянию. Если они существенны, обнови исходник,
+пересобери экспорт и проверь ссылки. Сохрани журнал с датой и основаниями.</code></pre></div>
+<p>Для собственного подключённого инструмента опиши схему входа,
+ожидаемый ответ, ошибки, повторный вызов и пределы полномочий. Для
+операций с изменением данных полезны стабильный ID, предусловие версии и
+чтение результата после записи. Сначала проверь процедуру на тестовых
+данных. <a
+href="https://learn.chatgpt.com/docs/skills-and-plugins">Skills и
+плагины</a> · <a href="https://developers.openai.com/api/docs/mcp">MCP в
+документации OpenAI</a>.</p>
+</section>
+<section class="chapter" id="automation">
+<h2>Автоматизация и длительная работа</h2>
+<p>Различай текущий длительный запуск и новую задачу по расписанию. Для
+расписания укажи часовую зону, частоту, данные, условие действия и
+способ отчёта. Для мониторинга сформулируй наблюдаемое условие. Облачная
+задача должна иметь доступ к источникам без твоего компьютера. Если
+выполнение требует локального компьютера, следуй условиям выбранной
+среды.</p>
+<div class="snippet"><pre class="text"><code>Раз в две недели по пятницам утром по Киеву сравнивай текущую книгу
+с официальными источниками. Дубли проверяй по версии и журналу.
+При существенном изменении подготовь правки и собери тестовый комплект.
+При отсутствии изменений дай короткий статус. Если не хватает доступа,
+укажи конкретный блокер и оставь проверяемый результат.</code></pre></div>
+<p>Для длинной работы полезна контрольная точка с версиями и оставшимися
+шагами. Разделять независимые части между агентами стоит, когда среда
+это позволяет и результат можно собрать по общим критериям. Для повторов
+используй стабильные источники, отметку обработанной версии и правило
+восстановления после частичного сбоя. <a
+href="https://learn.chatgpt.com/docs/automations">Задачи по
+расписанию</a> · <a
+href="https://learn.chatgpt.com/docs/long-running-work">Длительная
+работа</a>.</p>
+</section>
+<section class="chapter" id="api">
+<h2>API, когда результат нужен в программе</h2>
+<p>У ChatGPT и OpenAI API разные способы доступа и учёта. В API выбери
+поддерживаемую модель и передавай ключ через защищённое окружение на
+сервере. Для разового текстового ответа используй документированный
+вызов. Для интеграции добавь схему результата, валидацию, таймаут,
+бюджет, обработку ошибок и регистрацию исхода.</p>
+<div class="snippet"><pre class="python"><code>import os
+from openai import OpenAI
+
+client = OpenAI()
+response = client.responses.create(
+    model=os.environ[&quot;OPENAI_MODEL&quot;],
+    input=&quot;Предложи три проверяемых критерия приёмки CSV-импорта.&quot;,
+)
+print(response.output_text)</code></pre></div>
+<p>Пример показывает форму вызова. Для запуска нужен установленный
+Python SDK OpenAI, действующий доступ, переменная OPENAI_API_KEY и
+идентификатор доступной модели в OPENAI_MODEL. На сервере ключ не
+попадает в клиентский код или логи. Если машина должна читать ответ,
+проверь подходящую схему структурированного вывода и валидацию в
+приложении. Для внешних действий отдельно проверь аргументы и полномочия
+вызывающего пользователя. <a
+href="https://developers.openai.com/api/docs/quickstart">Быстрый старт
+API</a> · <a
+href="https://developers.openai.com/api/docs/guides/structured-outputs">Структурированный
+вывод</a>.</p>
+</section>
+<section class="chapter" id="evaluation">
+<h2>Проверка агента, модели и рабочего процесса</h2>
+<p>Подготовь набор из обычных случаев и известных сложных примеров.
+Зафиксируй входы, ожидаемые результаты и допустимые отклонения.
+Сравнивай режимы на одинаковых данных. Для исследовательской задачи
+считай долю утверждений с корректной опорой на источник. Для файлов
+проверяй открытие, формулы и контрольные числа. Для операций с записью
+проверь, что повтор после сбоя оставляет ровно одну ожидаемую
+запись.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Случай</th>
+<th>Минимальный критерий</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Неоднозначный получатель</td>
+<td>Уточняет ID до внешнего действия</td>
+</tr>
+<tr class="even">
+<td>Разрыв после записи</td>
+<td>Читает состояние перед повтором и избегает дубля</td>
+</tr>
+<tr class="odd">
+<td>Неактуальная редакция</td>
+<td>Сверяет текущую версию, объясняет расхождение</td>
+</tr>
+<tr class="even">
+<td>Неполный доступ</td>
+<td>Возвращает готовую часть и точный блокер</td>
+</tr>
+<tr class="odd">
+<td>Вредоносный текст во вложении</td>
+<td>Сохраняет границы исходной задачи и разрешений</td>
+</tr>
+</tbody>
+</table>
+<p>Проверку веди на обезличенном тестовом наборе. При смене модели или
+инструмента сохрани предыдущий результат и поменяй одну переменную за
+раз. Для технического процесса фиксируй длительность, частоту ошибок и
+стоимость на принятый результат. Критичную операцию держи за проверяемым
+предусловием.</p>
+</section>
+<section class="chapter" id="security">
+<h2>Безопасность данных и эксплуатация в команде</h2>
+<p>Раздели публичные, внутренние и ограниченные данные. Давай агенту
+минимальный доступ, нужный для операции. Ключи держи в хранилище
+секретов или защищённом окружении. В журналах оставляй технические ID,
+версии и статусы, фильтруя личные данные и секреты. Перед созданием
+публичного сайта или общей страницы проверь аудиторию и вложения.</p>
+<p>Командный агент полезен, когда есть владелец процесса, правила и
+тестовый набор. Проверь, кто может запускать его, какие источники он
+видит и кто отвечает за исключения. Для общего пространства и проектов
+разделяй права редактора и читателя. Доступность workspace agents и
+управление ими проверяй в своей организации.</p>
+<div class="snippet"><pre class="text"><code>Проведи предрелизную проверку в режиме чтения. Определи, какие файлы
+и страницы будут видны внешнему пользователю. Сверь путь деплоя,
+найди случайно включённые приватные данные. Дай список доказательств
+и исправлений. Доступ, ключи и продакшен пока не меняй.</code></pre></div>
+<p><a
+href="https://learn.chatgpt.com/docs/permission-modes">Разрешения</a> ·
+<a
+href="https://help.openai.com/en/articles/7730893-data-controls-in-chatgpt">Настройки
+данных</a> · <a href="https://learn.chatgpt.com/docs/space">Командные
+пространства</a>.</p>
+</section>
+<section class="chapter" id="release">
+<h2>Чек-лист технического выпуска</h2>
+<p><strong>Пример.</strong> Для автономного каталога зафиксируй версии
+входных файлов, подготовь обезличенный набор проверки, собери архив и
+распакуй его отдельно. Проверь несколько реальных сценариев, включая
+пустой каталог и нестандартные имена. Отдельно зафиксируй версию, commit
+SHA, результат проверки и ссылку на скачивание.</p>
+<ol type="1">
+<li><strong>Входы.</strong> Сверь актуальность и права доступа.
+Зафиксируй версии и ограничения.</li>
+<li><strong>Исполнение.</strong> Раздели наблюдение, вычисление, правку
+и внешнее действие.</li>
+<li><strong>Приёмка.</strong> Прогони контрольные примеры. Проверь
+ошибки, повторы и результат на целевой поверхности.</li>
+<li><strong>Публикация.</strong> Сверь адрес, аудиторию и версию. Открой
+фактический результат после операции.</li>
+<li><strong>Передача.</strong> Отдай источники, экспорт и короткую
+запись о проверке, ограничениях и непроверенных сценариях.</li>
+</ol>
+<p>Если модель, права или инструмент поменялись, повтори приёмку на
+репрезентативном наборе. В отчёте различай «подготовлено», «проверено»,
+«запланировано» и «опубликовано». Для финансовых, медицинских,
+юридических и инженерно-безопасностных решений уровень проверки задаётся
+последствиями ошибки.</p>
+<section id="справочники" class="level3">
+<h3>Справочники</h3>
+<p><a
+href="https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview">Возможности
+ChatGPT</a> · <a
+href="https://learn.chatgpt.com/docs/use-chatgpt">ChatGPT Learn</a> · <a
+href="https://learn.chatgpt.com/docs/permission-modes">Модель прав
+доступа</a> · <a
+href="https://developers.openai.com/api/docs/quickstart">OpenAI
+API</a>.</p>
+</section>
+</section>
+
+<footer class="screen-only">Самостоятельное руководство CR20KB. <a href="https://github.com/cr20kb-commits/cr20kb-calculate/tree/main/chatgpt-handbook">Исходники на GitHub</a>.</footer>
+</main><script>
+document.querySelectorAll('.snippet pre').forEach(pre => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'copy screen-only';
+  button.textContent = 'Копировать команду';
+  button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(pre.textContent.trim());
+      button.textContent = 'Скопировано';
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(pre);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      button.textContent = 'Текст выделен';
+    }
+  });
+  pre.after(button);
+});
+</script></body></html>
