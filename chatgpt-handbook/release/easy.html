@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Вопросы, обучение, поиск, голос, фото, файлы, расчёты, проекты и напоминания.">
+<meta name="theme-color" content="#eef1ee">
+<meta name="cr20kb-edition" content="1.0.0">
+<meta name="cr20kb-verified" content="2026-11-06">
+<link rel="canonical" href="https://cr20kb.com/utilities/chatgpt-handbook/easy.html">
+<title>ChatGPT в деле · Млад и стар | CR20KB</title>
+<style>:root{--accent:#317659}
+*{box-sizing:border-box}
+:root{color-scheme:light;--paper:#fff;--surface:#eef1ee;--ink:#18251e;--muted:#48594e;--line:#d9e2d9}
+body{margin:0;background:var(--surface);color:var(--ink);font:17px/1.6 system-ui,'Segoe UI',sans-serif}
+a{color:var(--accent);text-underline-offset:.16em}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+main{width:min(100% - 32px,920px);margin:auto;padding:20px 0 48px}
+.top,.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top{justify-content:space-between;margin-bottom:18px;font-size:.9rem}
+.top a{font-weight:650}
+.cover,.chapter,.card{background:var(--paper);border:1px solid var(--line);border-radius:17px}
+.cover,.chapter{padding:clamp(18px,4vw,42px);margin-bottom:16px}
+.cover{border-top:5px solid var(--accent)}
+.kicker,.label{font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(2.2rem,7vw,4.15rem);line-height:1.02;letter-spacing:-.045em;margin:.25em 0}
+h2{font-size:clamp(1.45rem,4.5vw,2rem);line-height:1.16;margin:.2em 0 .65em}
+h3{font-size:1.1em;line-height:1.2;margin:1.1em 0 .45em}
+p,ul,ol{margin-bottom:.9em}
+.lead{font-size:1.23em;line-height:1.38;max-width:36rem}
+.meta,.muted,footer{color:var(--muted);font-size:.9em}
+.cover figure{max-width:660px;margin:20px 0}
+.cover svg{display:block;width:100%;height:auto}
+figcaption{font-size:.84em;color:var(--muted);margin-top:8px}
+.toc{margin-top:20px;border-top:1px solid var(--line);padding-top:12px}
+.toc ol{margin-top:6px;padding-left:1.45em}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.chapter{scroll-margin-top:12px}
+pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font:inherit}
+code{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;font-size:.92em}
+pre code{font:inherit}
+.snippet{position:relative;background:#f2f6f2;border-left:3px solid var(--accent);border-radius:0 9px 9px 0;padding:12px 15px;margin:0 0 1em}
+.copy{margin-top:9px;background:white;border:1px solid var(--line);border-radius:7px;padding:4px 9px;color:var(--accent);font:inherit;font-size:.79em;font-weight:700;cursor:pointer}
+table{border-collapse:collapse;width:100%;table-layout:fixed;margin:.45em 0 1.1em;font-size:.91em}
+th,td{padding:7px 9px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{background:#edf3ee;color:var(--ink)}
+.button{display:inline-block;background:var(--accent);color:white;text-decoration:none;font-weight:700;border-radius:8px;padding:7px 12px}
+.secondary{background:white;border:1px solid var(--line);color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.card{padding:18px;display:flex;flex-direction:column;border-top:4px solid var(--accent)}
+.card h2{font-size:1.42rem}
+.card .actions{margin-top:auto}
+.card .button{font-size:.89em}
+footer{border-top:1px solid var(--line);padding:14px 0}
+@media(max-width:690px){.cards{grid-template-columns:1fr}.top{justify-content:flex-start}}
+@page{size:A4;margin:16mm 17mm 17mm}
+@media print{
+  body{background:white;font-size:11.5pt;line-height:1.45}
+  main{width:auto;margin:0;padding:0}
+  .screen-only,button,footer{display:none!important}
+  .cover,.chapter{border:0;border-radius:0;padding:0;margin:0}
+  .cover{padding-top:7mm;border-top:4pt solid var(--accent)}
+  .chapter{break-before:page;padding-top:3mm}
+  .chapter h2{margin-top:3mm}
+  h1{font-size:36pt}
+  h2{font-size:23pt}
+  h3{break-after:avoid}
+  table,.snippet,figure{break-inside:avoid}
+  .cover figure{margin:10mm 0}
+  .toc{margin-top:7mm}
+  a{text-decoration:none}
+}
+</style>
+</head><body><main>
+
+<nav class="top screen-only" aria-label="Навигация по книге"><a href="./index.html">← Все редакции</a>
+<a href="./CR20KB_ChatGPT_Handbook_easy.pdf">Скачать PDF</a></nav>
+<header class="cover">
+<p class="kicker">CR20KB · Руководство по эксплуатации · 01</p>
+<h1>ChatGPT<br>в деле</h1>
+<p class="lead"><strong>Млад и стар</strong><br>От первого вопроса до своей задачи</p>
+
+<figure><svg viewBox="0 0 640 240" role="img" aria-labelledby="graphic-title graphic-desc">
+<title id="graphic-title">Три способа работы с ChatGPT</title>
+<desc id="graphic-desc">Три карточки изображают диалог, рабочий документ и среду разработки.</desc>
+<rect width="640" height="240" rx="18" fill="#183328"/>
+<path d="M28 120h584" stroke="#375d4c" stroke-width="2" stroke-dasharray="5 9"/>
+<rect x="46" y="46" width="156" height="148" rx="16" fill="#d8e8d4"/>
+<rect x="242" y="46" width="156" height="148" rx="16" fill="#d8e6ec"/>
+<rect x="438" y="46" width="156" height="148" rx="16" fill="#ecdfcb"/>
+<path d="M83 83h82a9 9 0 0 1 9 9v39a9 9 0 0 1-9 9h-48l-24 18v-18H83a9 9 0 0 1-9-9V92a9 9 0 0 1 9-9z" fill="#317659"/>
+<circle cx="102" cy="112" r="4" fill="#fff"/><circle cx="124" cy="112" r="4" fill="#fff"/><circle cx="146" cy="112" r="4" fill="#fff"/>
+<path d="M287 73h47l19 19v73h-66z" fill="#225c83"/><path d="M334 73v20h19m-51 17h34m-34 15h34m-34 15h23" fill="none" stroke="#edf5f8" stroke-width="4" stroke-linecap="round"/>
+<rect x="470" y="83" width="92" height="74" rx="8" fill="#81552b"/>
+<path d="M470 100h92m-69 14 11 9-11 9m20 2h22" fill="none" stroke="#fff4e4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#fff4e4"><circle cx="482" cy="92" r="2"/><circle cx="491" cy="92" r="2"/><circle cx="500" cy="92" r="2"/></g>
+</svg><figcaption>Диалог, готовый результат и разработка. Выбирай способ работы по задаче.</figcaption></figure>
+
+<p class="meta">Текст и примеры — ChatGPT для CR20KB<br>Версия 1.0.0 · Источники сверены 6 ноября 2026</p>
+<nav class="toc" aria-label="Оглавление"><strong>Оглавление</strong><ol><li><a href="#start">Первые пять минут</a></li><li><a href="#request">Пиши мне так, как ставишь задачу человеку</a></li><li><a href="#learn">Учись через примеры и вопросы</a></li><li><a href="#search">Ищи свежие сведения и проверяй источник</a></li><li><a href="#inputs">Говори, показывай и прикрепляй</a></li><li><a href="#images">Сделай картинку и исправь одну деталь</a></li><li><a href="#files">Прочитай документ и получи свой файл</a></li><li><a href="#numbers">Посчитай, сравни и пойми результат</a></li><li><a href="#projects">Продолжай проект, сохраняя важное</a></li><li><a href="#actions">Поручи действие и проверь, что оно состоялось</a></li><li><a href="#privacy">Береги личное и проверяй важное</a></li><li><a href="#practice">Попробуй целую задачу от начала до конца</a></li></ol></nav>
+</header>
+<section class="chapter" id="start">
+<h2>Первые пять минут</h2>
+<p>Открой ChatGPT и напиши, чего хочешь добиться. Мне можно отвечать
+обычным языком, с опечатками и на ходу. Достаточно одной конкретной
+задачи. Начни с «объясни», «помоги придумать» или «сделай».</p>
+<div class="snippet"><pre class="text"><code>Объясни, почему длинную линейку легко согнуть плашмя и трудно согнуть ребром. Объясни на домашнем примере, простыми словами. Потом задай мне один вопрос, чтобы я проверил, что понял.</code></pre></div>
+<p>Можешь уточнять сразу после ответа. Скажи «покажи по шагам», «объясни
+короче», «я споткнулся на втором шаге» или «теперь дай пример без
+линейки». Когда начинаешь отдельную тему, открой новый чат. Если хочешь
+вернуться к старой задаче, найди тот разговор и продолжи в нём.</p>
+<section id="три-способа-работы" class="level3">
+<h3>Три способа работы</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Где начать</th>
+<th>Что попробовать</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Чат</td>
+<td>Разобраться в вопросе, придумать идею, поправить текст</td>
+</tr>
+<tr class="even">
+<td>Work, если доступен</td>
+<td>Получить готовую таблицу, PDF, презентацию или другое рабочее
+изделие</td>
+</tr>
+<tr class="odd">
+<td>Codex, если доступен</td>
+<td>Исправить программу, проверить файлы проекта или сделать простую
+страницу</td>
+</tr>
+</tbody>
+</table>
+<p>Режимы и кнопки зависят от приложения, аккаунта и настроек. Начни с
+обычного чата и при необходимости попроси перейти к конкретному файлу.
+<a href="https://learn.chatgpt.com/docs/use-chatgpt">Как выбрать
+режим</a>.</p>
+</section>
+</section>
+<section class="chapter" id="request">
+<h2>Пиши мне так, как ставишь задачу человеку</h2>
+<p>Скажи четыре вещи. Что нужно сделать, кому это нужно, какие данные
+использовать и как должен выглядеть результат. Если есть ограничение,
+например «до 100 слов» или «оставь цены как есть», назови его сразу.</p>
+<div class="snippet"><pre class="text"><code>Помоги написать сообщение соседу. Завтра нужно перенести встречу на вечер, свободен после 18:00. Сделай два дружелюбных варианта по две строки. Адрес, причину и точное время не придумывай.</code></pre></div>
+<p>Проверь, что даты и имена верны. Если первый вариант слишком
+официальный, попроси поменять тон и сохранить смысл. Так же можно
+подготовить объявление, приглашение, короткое письмо или перевод. Когда
+текст важен, попроси перечислить места, где смысл был неоднозначен.</p>
+<section id="потренируйся-на-своём-примере" class="level3">
+<h3>Потренируйся на своём примере</h3>
+<p>Возьми сообщение, которое уже написал, и попроси сделать его
+понятнее. Дай два условия, которые нельзя менять. Сравни версии и выбери
+свою. Написать сообщение и отправить его — два разных шага. Само
+появление текста в чате означает, что черновик готов.</p>
+</section>
+</section>
+<section class="chapter" id="learn">
+<h2>Учись через примеры и вопросы</h2>
+<p>Скажи, что уже знаешь. Если тема сложная, попроси один пример, затем
+одну маленькую задачу. Если у тебя есть своё решение, пришли его и
+попроси показать первое место, где ты ошибся. Это полезно для языка,
+школьной темы, ручного расчёта или нового инструмента.</p>
+<div class="snippet"><pre class="text"><code>Я учусь переводить миллиметры в сантиметры. Объясни на трёх примерах. Дай мне один пример без ответа. Когда я отвечу, проверь и покажи, где я сбился.</code></pre></div>
+<p>Для разговора на другом языке попроси разыграть короткую сцену.
+Например, встреча с заказчиком и три простых вопроса о проекте. Можно
+включить голосовой режим, если он доступен, или вести диалог письменно.
+Имена, цифры и новые слова лучше сверить по тексту. <a
+href="https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview">Обзор
+функций</a>.</p>
+</section>
+<section class="chapter" id="search">
+<h2>Ищи свежие сведения и проверяй источник</h2>
+<p>Если вопрос зависит от даты, цены или расписания, прямо попроси
+поискать в интернете. Укажи место, дату и интересующий диапазон. Для
+объявления или расписания попроси ссылку на саму страницу. Открой её и
+проверь, что условия подходят тебе.</p>
+<div class="snippet"><pre class="text"><code>Проверь на официальном сайте музея, открыт ли он в это воскресенье. Укажи город, точную дату и часы, которые написаны в источнике. Если расписание на этот день не опубликовано, скажи это отдельно.</code></pre></div>
+<p>Если вопрос большой и нужно сравнить несколько источников, попробуй
+глубокое исследование, если оно доступно. Для начала дай один узкий
+вопрос. Если я ссылаюсь на источник, а нужной фразы там нет, попроси
+показать точное место. <a
+href="https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview">Поиск
+и исследование</a>.</p>
+</section>
+<section class="chapter" id="inputs">
+<h2>Говори, показывай и прикрепляй</h2>
+<p>Если доступен голос, можно объяснить задачу вслух. После разговора
+попроси оформить результат письменно. Перепроверь имена, даты, цены и
+числа, которые важны. Для точной записи значений можно написать их
+отдельным сообщением.</p>
+<p>Прикрепи фотографию или скриншот, если вопрос зависит от того, что на
+экране. Отметь место, на которое надо смотреть. Нечёткую надпись лучше
+переснять ближе или продублировать текстом.</p>
+<div class="snippet"><pre class="text"><code>Посмотри на скриншот. Перепиши только сообщение об ошибке в выделенной области. Нечитаемое обозначь вопросительным знаком. Затем простыми словами объясни, что можно безопасно проверить.</code></pre></div>
+<p>Перед загрузкой обрежь всё лишнее, например адрес, номер телефона,
+пароль, чужое лицо или переписку на фоне. Для распознавания рукописи
+попроси сначала показать расшифровку, а потом делать выводы. <a
+href="https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview">Файлы,
+звук и изображения</a>.</p>
+</section>
+<section class="chapter" id="images">
+<h2>Сделай картинку и исправь одну деталь</h2>
+<p>Опиши предмет, обстановку, стиль и форму кадра. Если в изображении
+будет текст, возьми точную фразу в кавычки. После генерации проверь
+буквы, края кадра и важные детали.</p>
+<div class="snippet"><pre class="text"><code>Создай квадратную акварельную открытку. На столе синяя кружка, за окном снег, справа тёплая лампа. Оставь пустое место сверху для поздравления. Без надписей.</code></pre></div>
+<p>Если нужно изменить цвет кружки, попроси изменить только её и
+перечисли остальное, что хочешь сохранить. Для точной правки прикрепи
+понравившийся вариант. Скачай его до следующего изменения. Больше команд
+есть в отдельной <a
+href="https://cr20kb.com/utilities/chatgpt-images/">книге CR20KB о
+картинках</a>.</p>
+</section>
+<section class="chapter" id="files">
+<h2>Прочитай документ и получи свой файл</h2>
+<p>Прикрепи документ и объясни, какая часть тебя интересует. Можно
+попросить перевести одну страницу, вынести в список сроки или составить
+конспект. Если документ отсканирован и текст плохо читается, скажи,
+какие места переснять.</p>
+<div class="snippet"><pre class="text"><code>Прочитай прикреплённый PDF. Собери таблицу из трёх столбцов: что сделать, к какому сроку, на какой странице это сказано. Неизвестные сроки оставь пустыми. Дай короткое резюме и готовый файл таблицы, если здесь доступно создание файлов.</code></pre></div>
+<p>Чтобы проверить результат, открой две страницы из ответа и сверь
+формулировки. Если нужен файл, назови формат. Например, PDF для печати
+или XLSX для редактирования. Когда я дал файл, скачай его и открой в
+обычном приложении. <a
+href="https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview">Работа
+с файлами</a>.</p>
+</section>
+<section class="chapter" id="numbers">
+<h2>Посчитай, сравни и пойми результат</h2>
+<p>Дай числа с единицами и скажи, что хочешь узнать. Для обычного
+расчёта попроси формулу и подстановку. Для таблицы попроси указать,
+какие строки вошли в итог, и проверить сумму отдельным способом.</p>
+<div class="snippet"><pre class="text"><code>Я купил тетрадь за 45 грн, карандаш за 18 грн и две ручки по 24 грн. Посчитай общую сумму, покажи подстановку и остаток от 150 грн.</code></pre></div>
+<p>Ответ можно сверить вручную. Ручки стоят 48 грн, всё вместе 111 грн,
+остаток 39 грн. Если в похожей задаче число непонятно, попроси объяснить
+каждое слагаемое.</p>
+<p>Можно сравнить варианты в таблице. Назови свои критерии, например
+цена, вес, размер и возможность ремонта. Если цены нужно найти, явно
+попроси поиск с датой. Если цена приблизительная, попроси отметить это в
+таблице. <a
+href="https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview">Анализ
+данных</a>.</p>
+</section>
+<section class="chapter" id="projects">
+<h2>Продолжай проект, сохраняя важное</h2>
+<p>Для большой темы создай проект, если он доступен. Например,
+«Мастерская», «Английский» или «Книга». Держи в проекте нужные чаты,
+файлы и короткие правила. После важного решения попроси записать итог в
+одном месте.</p>
+<div class="snippet"><pre class="text"><code>Сделай короткую заметку по проекту. Что уже готово, какое решение мы приняли, какой файл актуальный и что сделать следующим. Данные бери из этого разговора.</code></pre></div>
+<p>Память помогает учитывать предпочтения, если она включена. Важное
+требование к конкретной работе лучше повторить или записать в проект.
+Посмотреть и изменить память можно в настройках. Временный чат подходит
+для отдельного разговора без обычного использования и пополнения памяти.
+У него свои правила хранения. <a
+href="https://help.openai.com/en/articles/10169521-projects-in-chatgpt">Проекты</a>
+· <a
+href="https://help.openai.com/en/articles/8590148-memory-in-chatgpt">Память</a>
+· <a
+href="https://help.openai.com/en/articles/8914046-temporary-chat-in-chatgpt">Временный
+чат</a>.</p>
+</section>
+<section class="chapter" id="actions">
+<h2>Поручи действие и проверь, что оно состоялось</h2>
+<p>Если в твоём аккаунте подключены нужные приложения, можно попросить
+найти письмо, сверить календарь или подготовить публикацию. Сначала дай
+точную цель и границу действия. Для первого опыта попроси только поиск
+или черновик, затем проверь нужные данные.</p>
+<div class="snippet"><pre class="text"><code>Если у тебя есть доступ к моему календарю, проверь, свободно ли завтра с 18:00 до 19:00 по Киеву. Событие пока не создавай. Если доступа нет, скажи прямо.</code></pre></div>
+<p>Для напоминания укажи дату, время, часовой пояс и текст. Убедись, что
+приложение показало созданную задачу. Для файла ищи ссылку на
+скачивание, для отправки — подтверждение сервиса, для публикации —
+рабочую ссылку. Если выполнение зависит от подключения или согласия, я
+могу попросить тебя выполнить этот шаг. <a
+href="https://learn.chatgpt.com/docs/automations">Задачи по
+расписанию</a>.</p>
+</section>
+<section class="chapter" id="privacy">
+<h2>Береги личное и проверяй важное</h2>
+<p>Перед загрузкой фото или файла спроси себя, что из него нужно для
+задачи. Для разбора квитанции часто хватает суммы, даты и строки с
+услугой. Можно закрыть имя, адрес и номер счёта. Для исправления
+сообщения можно заменить имена на «коллега» и «заказчик». Пароли и коды
+входа в чат вставлять не нужно.</p>
+<div class="snippet"><pre class="text"><code>Прочитай эту обезличенную выписку. Отдели то, что прямо написано, от предположений. Если для ответа не хватает данных, перечисли недостающие поля и объясни, зачем они нужны.</code></pre></div>
+<p><strong>Когда цена ошибки высока.</strong> Я могу объяснить текст,
+собрать вопросы для врача или юриста и помочь сравнить документы. Важное
+решение проверь по первичному источнику или с профильным специалистом.
+Особенно внимательно проверь дозировки, даты, адреса, суммы и инструкции
+по безопасности.</p>
+<p>Для разового разговора можно выбрать временный чат, если он доступен.
+Для управления данными открой настройки аккаунта и прочитай, что
+означают конкретные переключатели. <a
+href="https://help.openai.com/en/articles/8914046-temporary-chat-in-chatgpt">Временный
+чат</a> · <a
+href="https://help.openai.com/en/articles/7730893-data-controls-in-chatgpt">Управление
+данными</a>.</p>
+</section>
+<section class="chapter" id="practice">
+<h2>Попробуй целую задачу от начала до конца</h2>
+<p><strong>Упражнение «План для мастерской».</strong> Начни с просьбы
+составить список из трёх шагов на выходные. Добавь ограничения по
+времени. Попроси сделать таблицу, затем проверь, что сумма времени
+укладывается в твой лимит. В конце попроси файл или сохрани текст в
+заметки.</p>
+<div class="snippet"><pre class="text"><code>У меня два часа в субботу. Хочу разобрать крепёж, убрать стол и записать, каких инструментов не хватает. Дай план с длительностью каждого шага и 15 минутами запаса. Проверь общую сумму времени.</code></pre></div>
+<p><strong>Если что-то пошло не так.</strong> Укажи конкретную ошибку.
+Например, «в таблице пропущен запас» или «в ответе неверно имя». Попроси
+исправить именно это, затем посмотри результат ещё раз. Если нужен
+готовый продукт, обозначь вид результата и как ты его проверишь.</p>
+<section id="куда-двигаться-дальше" class="level3">
+<h3>Куда двигаться дальше</h3>
+<p>В «Стандарте» есть рабочие цепочки от источников до файлов, а в
+«Профи» — разработка, автоматизация и приёмка. Режимы и функции
+проверялись по документации OpenAI. Команды и упражнения составлены для
+CR20KB.</p>
+</section>
+</section>
+
+<footer class="screen-only">Самостоятельное руководство CR20KB. <a href="https://github.com/cr20kb-commits/cr20kb-calculate/tree/main/chatgpt-handbook">Исходники на GitHub</a>.</footer>
+</main><script>
+document.querySelectorAll('.snippet pre').forEach(pre => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'copy screen-only';
+  button.textContent = 'Копировать команду';
+  button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(pre.textContent.trim());
+      button.textContent = 'Скопировано';
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(pre);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      button.textContent = 'Текст выделен';
+    }
+  });
+  pre.after(button);
+});
+</script></body></html>
