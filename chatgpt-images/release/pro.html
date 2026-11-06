@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Инженерные исходники, локальные правки, приёмка и приложение по API.">
+<meta name="theme-color" content="#eef1ee">
+<meta name="cr20kb-edition" content="1.0.0">
+<meta name="cr20kb-verified" content="2026-11-06">
+<link rel="canonical" href="https://cr20kb.com/utilities/chatgpt-images/pro.html">
+<title>Картинки с ChatGPT · Профи | CR20KB</title>
+<style>:root{--accent:#81552b}
+*{box-sizing:border-box}
+:root{color-scheme:light;--paper:#fff;--surface:#eef1ee;--ink:#18251e;--muted:#48594e;--line:#d9e2d9}
+body{margin:0;background:var(--surface);color:var(--ink);font:17px/1.6 system-ui,'Segoe UI',sans-serif}
+a{color:var(--accent);text-underline-offset:.16em}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+main{width:min(100% - 32px,920px);margin:auto;padding:20px 0 48px}
+.top,.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top{justify-content:space-between;margin-bottom:18px;font-size:.9rem}
+.top a{font-weight:650}
+.cover,.chapter,.card{background:var(--paper);border:1px solid var(--line);border-radius:17px}
+.cover,.chapter{padding:clamp(18px,4vw,42px);margin-bottom:16px}
+.cover{border-top:5px solid var(--accent)}
+.kicker,.label{font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(2.2rem,7vw,4.15rem);line-height:1.02;letter-spacing:-.045em;margin:.25em 0}
+h2{font-size:clamp(1.45rem,4.5vw,2rem);line-height:1.16;margin:.2em 0 .65em}
+h3{font-size:1.1em;line-height:1.2;margin:1.1em 0 .45em}
+p,ul,ol{margin-bottom:.9em}
+.lead{font-size:1.23em;line-height:1.38;max-width:36rem}
+.meta,.muted,footer{color:var(--muted);font-size:.9em}
+.cover figure{max-width:660px;margin:20px 0}
+.cover svg{display:block;width:100%;height:auto}
+figcaption{font-size:.84em;color:var(--muted);margin-top:8px}
+.toc{margin-top:20px;border-top:1px solid var(--line);padding-top:12px}
+.toc ol{margin-top:6px;padding-left:1.45em}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.chapter{scroll-margin-top:12px}
+pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font:inherit}
+code{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;font-size:.92em}
+pre code{font:inherit}
+.snippet{position:relative;background:#f2f6f2;border-left:3px solid var(--accent);border-radius:0 9px 9px 0;padding:12px 15px;margin:0 0 1em}
+.copy{margin-top:9px;background:white;border:1px solid var(--line);border-radius:7px;padding:4px 9px;color:var(--accent);font:inherit;font-size:.79em;font-weight:700;cursor:pointer}
+table{border-collapse:collapse;width:100%;table-layout:fixed;margin:.45em 0 1.1em;font-size:.91em}
+th,td{padding:7px 9px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{background:#edf3ee;color:var(--ink)}
+.button{display:inline-block;background:var(--accent);color:white;text-decoration:none;font-weight:700;border-radius:8px;padding:7px 12px}
+.secondary{background:white;border:1px solid var(--line);color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.card{padding:18px;display:flex;flex-direction:column;border-top:4px solid var(--accent)}
+.card h2{font-size:1.42rem}
+.card .actions{margin-top:auto}
+.card .button{font-size:.89em}
+footer{border-top:1px solid var(--line);padding:14px 0}
+@media(max-width:690px){.cards{grid-template-columns:1fr}.top{justify-content:flex-start}}
+@page{size:A4;margin:16mm 17mm 17mm}
+@media print{
+  body{background:white;font-size:11.5pt;line-height:1.45}
+  main{width:auto;margin:0;padding:0}
+  .screen-only,button,footer{display:none!important}
+  .cover,.chapter{border:0;border-radius:0;padding:0;margin:0}
+  .cover{padding-top:7mm;border-top:4pt solid var(--accent)}
+  .chapter{break-before:page;padding-top:3mm}
+  .chapter h2{margin-top:3mm}
+  h1{font-size:36pt}
+  h2{font-size:23pt}
+  h3{break-after:avoid}
+  table,.snippet,figure{break-inside:avoid}
+  .cover figure{margin:10mm 0}
+  .toc{margin-top:7mm}
+  a{text-decoration:none}
+}
+</style>
+</head><body><main>
+
+<nav class="top screen-only" aria-label="Навигация по книге"><a href="./index.html">← Все редакции</a>
+<a href="./CR20KB_ChatGPT_Images_pro.pdf">Скачать PDF</a></nav>
+<header class="cover">
+<p class="kicker">CR20KB · Руководство по эксплуатации · 03</p>
+<h1>Картинки<br>с ChatGPT</h1>
+<p class="lead"><strong>Профи</strong><br>Точное задание и контроль результата</p>
+
+<figure><svg viewBox="0 0 640 240" role="img" aria-labelledby="graphic-title graphic-desc">
+<title id="graphic-title">Робот с фонариком и свободная зона под текст</title>
+<desc id="graphic-desc">Условный макет баннера. Слева свободная треть, справа робот под снегом.</desc>
+<rect width="640" height="240" rx="18" fill="#183328"/>
+<path d="M360 208h236M426 206v-36m84 36v-36" stroke="#759187" stroke-width="5" stroke-linecap="round"/>
+<path d="M454 64V43m0 0 8-10" stroke="#cbe1bb" stroke-width="5" stroke-linecap="round"/>
+<circle cx="463" cy="33" r="7" fill="#edbd66"/>
+<rect x="400" y="63" width="113" height="72" rx="22" fill="#b6d9a4"/>
+<path d="M411 143h91l-6 44h-77z" fill="#71a784"/>
+<circle cx="438" cy="99" r="5" fill="#24382c"/>
+<circle cx="477" cy="99" r="5" fill="#24382c"/>
+<path d="M449 113q8 7 16 0m37 36 28 12" fill="none" stroke="#24382c" stroke-width="4" stroke-linecap="round"/>
+<path d="m506 152 20 8" stroke="#b6d9a4" stroke-width="6" stroke-linecap="round"/>
+<path d="M550 139l71-31v78l-71-27z" fill="#eec779" opacity=".28"/>
+<rect x="526" y="137" width="25" height="25" rx="5" fill="#f1bd65"/>
+<path d="M60 60h184v118H60z" fill="none" stroke="#8da99a" stroke-width="2" stroke-dasharray="7 7"/>
+<path d="M85 104h102m-102 19h78" stroke="#bdd2c6" stroke-width="4" stroke-linecap="round"/>
+<g fill="#d6e6e0"><circle cx="350" cy="61" r="3"/><circle cx="378" cy="104" r="3"/><circle cx="531" cy="49" r="3"/><circle cx="584" cy="67" r="3"/><circle cx="566" cy="107" r="3"/><circle cx="613" cy="39" r="3"/></g>
+</svg><figcaption>Учебный макет обложки. Компоновка проверяется отдельно от формы изделия.</figcaption></figure>
+
+<p class="meta">Текст и примеры — ChatGPT для CR20KB<br>Версия 1.0.0 · Источники сверены 6 ноября 2026</p>
+<nav class="toc" aria-label="Оглавление"><strong>Оглавление</strong><ol><li><a href="#brief">Техническое задание и условия приёмки</a></li><li><a href="#cad">Генерация вокруг инженерного исходника</a></li><li><a href="#edit">Протокол локальной правки</a></li><li><a href="#production">Текст, цвета и выпуск материалов</a></li><li><a href="#evaluation">Серия изображений и сравнение версий</a></li><li><a href="#api">Приложение. Когда нужен API</a></li></ol></nav>
+</header>
+<section class="chapter" id="brief">
+<h2>Техническое задание и условия приёмки</h2>
+<p>Записывай, что должно получиться на выходе, и проверяй результат в
+масштабе применения. Отделяй обязательные условия от художественных
+предпочтений. Чем меньше свободы у изображения по форме, маркировке и
+размещению, тем больше ценность зафиксированного исходника и ручного
+монтажа.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Уровень</th>
+<th>Пример для карточки кронштейна</th>
+<th>Способ проверки</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Обязательно</td>
+<td>Два отверстия, прямой фланец, исходный силуэт</td>
+<td>Сверка с утверждённым рендером</td>
+</tr>
+<tr class="even">
+<td>Предпочтительно</td>
+<td>Мягкая тень, графитовая поверхность</td>
+<td>Просмотр карточки на светлой и тёмной теме</td>
+</tr>
+<tr class="odd">
+<td>Свобода</td>
+<td>Положение слабого светового пятна</td>
+<td>Проверка контраста</td>
+</tr>
+<tr class="even">
+<td>За пределами генерации</td>
+<td>Размеры, допуски, марка материала</td>
+<td>CAD, КД и спецификация</td>
+</tr>
+</tbody>
+</table>
+<p>Сохрани исходники, промпт, версию результата и итоговое решение.
+Когда работаешь в ChatGPT, фиксируй доступное название режима и дату,
+если внутренний ID модели неизвестен. За исходные файлы принимай версии,
+на которые у тебя есть право и доступ. Для клиентских материалов перед
+загрузкой проверь условия проекта и убери данные, которые не нужны
+задаче.</p>
+</section>
+<section class="chapter" id="cad">
+<h2>Генерация вокруг инженерного исходника</h2>
+<p>В качестве первого вложения дай собственный утверждённый рендер. При
+необходимости вторым приложи образец света и фона. Геометрия и КД живут
+в CAD. Изображение можно использовать для презентации, если визуальный
+результат сверили с исходником.</p>
+<div class="snippet"><pre class="text"><code>Задача — обложка кейса о листовом кронштейне.
+Вложение 1 — утверждённый рендер детали. Сохрани контур, видимый гиб, два отверстия и ракурс. Вложение 2 — эталон освещения и фона, только для среды.
+Размести деталь справа, освещение мягкое сверху слева. Оставь левую треть для текста. Без размеров и маркировки. Широкий кадр.</code></pre></div>
+<p><strong>Приёмка.</strong> Проверь количество отверстий, контур гиба и
+кромки. Наложи картинку на исходный рендер при совпадающем масштабе.
+Если контуры разошлись, скомпонуй исходную деталь с отдельным
+сгенерированным фоном. Для контроля изменений чертежа сравни версии
+исходных PDF или CAD. Изменение размера на 1 мм проверь по размерному
+числу или непосредственно в модели.</p>
+<p><strong>Запасной сценарий.</strong> Попроси фон без предмета, с
+местом и светом под исходный рендер. Смонтируй деталь поверх, сохрани
+маску отдельным слоем.</p>
+</section>
+<section class="chapter" id="edit">
+<h2>Протокол локальной правки</h2>
+<ol type="1">
+<li>Сохрани утверждённую версию и дай ей понятное имя, например
+<code>bracket-base-v03.png</code>.</li>
+<li>Укажи область правки и перечисли защищённые детали.</li>
+<li>Сгенерируй правку от сохранённой версии. Сравни и прими её до
+следующего изменения.</li>
+<li>Если защищённые области должны совпасть попиксельно, перенеси нужный
+участок в оригинал обычным композитингом.</li>
+<li>Проверь итог на границе маски. Сверь на светлой и тёмной подложках
+ореолы, резкость и тени.</li>
+</ol>
+<div class="snippet"><pre class="text"><code>На выбранном кадре измени только заднюю стену справа от кронштейна. Сделай её матовой графитовой. Сохрани сам кронштейн, два отверстия, гиб, тень под деталью и весь передний план. Оставь кадрирование прежним.</code></pre></div>
+<p>Выделение в ChatGPT помогает показать область, но правка может
+распространиться за её границы. Для точного монтажа вычисляй разницу за
+пределами защищённой области на PNG одинаковых размеров. При допуске на
+перерисовку проверяй признаки по приёмке. <a
+href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">Редактор
+ChatGPT</a> · <a
+href="https://developers.openai.com/api/docs/guides/image-prompting">Приёмы
+редактирования OpenAI</a>.</p>
+</section>
+<section class="chapter" id="production">
+<h2>Текст, цвета и выпуск материалов</h2>
+<p>Для короткой надписи задай точные символы, положение и строку. После
+генерации сравни с утверждённой копией. Для точного фирменного цвета,
+артикула или схемы используй слои редактора с исходным логотипом и
+векторным текстом. Проверь фактические размеры файла, пропорции,
+альфа-канал и пригодность к печати.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Проверка</th>
+<th>Сигнал брака</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>100% масштаба</td>
+<td>Размытый контур, ореол или видимый шов</td>
+</tr>
+<tr class="even">
+<td>Размер публикации</td>
+<td>Деталь теряется, текст слишком мелкий</td>
+</tr>
+<tr class="odd">
+<td>Сверка с референсом</td>
+<td>Иной цвет, пропавшая фаска, добавленный крепёж</td>
+</tr>
+<tr class="even">
+<td>Строки и символы</td>
+<td>Перепутаны 0 и O, 1 и I, Е и Ё</td>
+</tr>
+<tr class="odd">
+<td>Файл</td>
+<td>Неверное соотношение сторон или сплошной фон вместо
+прозрачности</td>
+</tr>
+<tr class="even">
+<td>Право на публикацию</td>
+<td>В кадр попали чужой логотип, реквизиты или закрытые данные</td>
+</tr>
+</tbody>
+</table>
+<p>Подготовь экспорт под конкретный канал. Для A4 с печатью сначала
+выясни требования к полям, вылетам и разрешению, затем проверь
+распечатку или PDF в целевом размере.</p>
+</section>
+<section class="chapter" id="evaluation">
+<h2>Серия изображений и сравнение версий</h2>
+<p>Для серии сначала утверди эталонный кадр. Опиши правила для объекта,
+ракурса, света, подложки и свободной зоны. Для каждой картинки сохраняй
+те же референсы и меняй только содержание нового сюжета. При заметном
+уходе стиля вернись к эталону и задай критичные ограничения заново.</p>
+<section id="минимальный-набор-для-проверки" class="level3">
+<h3>Минимальный набор для проверки</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Случай</th>
+<th>Приёмка</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Предметный кадр</td>
+<td>Тот же контур, два отверстия, видны кромки</td>
+</tr>
+<tr class="even">
+<td>Локальная правка</td>
+<td>Новый фон, утверждённый объект сохранился</td>
+</tr>
+<tr class="odd">
+<td>Короткий текст</td>
+<td>Все символы совпали и читаются в публикации</td>
+</tr>
+<tr class="even">
+<td>PNG с прозрачностью</td>
+<td>Есть прозрачные пиксели, чистые края</td>
+</tr>
+</tbody>
+</table>
+<p>Сравни несколько запусков на одинаковых промптах и референсах. Меняй
+один параметр за раз. Запиши долю принятых картинок, время до готового
+результата и число повторов. Для API добавь стоимость всех попыток на
+один принятый файл. Единичная удача не показывает, насколько метод
+стабилен.</p>
+</section>
+</section>
+<section class="chapter" id="api">
+<h2>Приложение. Когда нужен API</h2>
+<p>В ChatGPT достаточно обычной команды. В автоматизированной сборке
+<strong>Image API</strong> подходит для разовых генераций и правок,
+<strong>Responses API</strong> для работы с изображениями в многошаговом
+диалоге. Доступ к модели и параметры проверяй для выбранного эндпоинта.
+Общий гайд и примеры могут описывать разные поколения. <a
+href="https://developers.openai.com/api/docs/guides/image-generation">Руководство
+по Image API</a>.</p>
+<p>На дату сверки руководство по запросам описывает
+<code>gpt-image-2.6-sunburst</code> и <code>gpt-image-2.6-flare</code>.
+Для этой серии <code>quality</code> регулирует детализацию рендера, а
+<code>complexity</code> управляет глубиной планирования композиции. Для
+точечной правки сравни <code>complexity=low</code> с настройкой по
+умолчанию при фиксированном качестве. Модели и API-параметры сверяй
+перед каждым переносом примера. <a
+href="https://developers.openai.com/api/docs/guides/image-prompting">Параметры
+GPT Image</a>.</p>
+<p>Пример тела запроса для <strong>POST /v1/images/generations</strong>.
+Используй его только при наличии доступа к выбранной модели. Это пример
+для API, команды выше предназначены для чата.</p>
+<div class="snippet"><pre class="json"><code>{
+  &quot;model&quot;: &quot;gpt-image-2.6-flare&quot;,
+  &quot;prompt&quot;: &quot;Нейтральный фон для карточки товара. Светло-серая матовая поверхность, мягкий свет слева. Без объектов и текста.&quot;,
+  &quot;size&quot;: &quot;1536x1024&quot;,
+  &quot;quality&quot;: &quot;medium&quot;,
+  &quot;output_format&quot;: &quot;png&quot;
+}</code></pre></div>
+<p>В рабочем контуре передавай ключ через окружение на сервере. В
+журнале храни ID модели, параметры, версию промпта и итог проверки. Не
+записывай ключ и клиентские вложения в общий лог. Обрабатывай временные
+ошибки ограниченным числом повторов. Ошибки доступа и параметров
+разбирай по ответу API до следующего вызова.</p>
+<section id="источники" class="level3">
+<h3>Источники</h3>
+<p><a
+href="https://developers.openai.com/api/docs/guides/image-prompting">OpenAI
+Image prompting</a> · <a
+href="https://developers.openai.com/api/docs/guides/image-generation">OpenAI
+Image generation</a> · <a
+href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">ChatGPT
+Images</a>.</p>
+</section>
+</section>
+
+<footer class="screen-only">Самостоятельное руководство CR20KB. <a href="https://github.com/cr20kb-commits/cr20kb-calculate/tree/main/chatgpt-images">Исходники на GitHub</a>.</footer>
+</main><script>
+document.querySelectorAll('.snippet pre').forEach(pre => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'copy screen-only';
+  button.textContent = 'Копировать команду';
+  button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(pre.textContent.trim());
+      button.textContent = 'Скопировано';
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(pre);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      button.textContent = 'Текст выделен';
+    }
+  });
+  pre.after(button);
+});
+</script></body></html>

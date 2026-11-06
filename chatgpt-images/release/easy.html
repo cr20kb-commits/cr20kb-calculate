@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Простые шаги для тех, кто впервые открывает картинки в ChatGPT.">
+<meta name="theme-color" content="#eef1ee">
+<meta name="cr20kb-edition" content="1.0.0">
+<meta name="cr20kb-verified" content="2026-11-06">
+<link rel="canonical" href="https://cr20kb.com/utilities/chatgpt-images/easy.html">
+<title>Картинки с ChatGPT · Млад и стар | CR20KB</title>
+<style>:root{--accent:#317659}
+*{box-sizing:border-box}
+:root{color-scheme:light;--paper:#fff;--surface:#eef1ee;--ink:#18251e;--muted:#48594e;--line:#d9e2d9}
+body{margin:0;background:var(--surface);color:var(--ink);font:17px/1.6 system-ui,'Segoe UI',sans-serif}
+a{color:var(--accent);text-underline-offset:.16em}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+main{width:min(100% - 32px,920px);margin:auto;padding:20px 0 48px}
+.top,.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top{justify-content:space-between;margin-bottom:18px;font-size:.9rem}
+.top a{font-weight:650}
+.cover,.chapter,.card{background:var(--paper);border:1px solid var(--line);border-radius:17px}
+.cover,.chapter{padding:clamp(18px,4vw,42px);margin-bottom:16px}
+.cover{border-top:5px solid var(--accent)}
+.kicker,.label{font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(2.2rem,7vw,4.15rem);line-height:1.02;letter-spacing:-.045em;margin:.25em 0}
+h2{font-size:clamp(1.45rem,4.5vw,2rem);line-height:1.16;margin:.2em 0 .65em}
+h3{font-size:1.1em;line-height:1.2;margin:1.1em 0 .45em}
+p,ul,ol{margin-bottom:.9em}
+.lead{font-size:1.23em;line-height:1.38;max-width:36rem}
+.meta,.muted,footer{color:var(--muted);font-size:.9em}
+.cover figure{max-width:660px;margin:20px 0}
+.cover svg{display:block;width:100%;height:auto}
+figcaption{font-size:.84em;color:var(--muted);margin-top:8px}
+.toc{margin-top:20px;border-top:1px solid var(--line);padding-top:12px}
+.toc ol{margin-top:6px;padding-left:1.45em}
+.toc a{text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.chapter{scroll-margin-top:12px}
+pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font:inherit}
+code{font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere;font-size:.92em}
+pre code{font:inherit}
+.snippet{position:relative;background:#f2f6f2;border-left:3px solid var(--accent);border-radius:0 9px 9px 0;padding:12px 15px;margin:0 0 1em}
+.copy{margin-top:9px;background:white;border:1px solid var(--line);border-radius:7px;padding:4px 9px;color:var(--accent);font:inherit;font-size:.79em;font-weight:700;cursor:pointer}
+table{border-collapse:collapse;width:100%;table-layout:fixed;margin:.45em 0 1.1em;font-size:.91em}
+th,td{padding:7px 9px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{background:#edf3ee;color:var(--ink)}
+.button{display:inline-block;background:var(--accent);color:white;text-decoration:none;font-weight:700;border-radius:8px;padding:7px 12px}
+.secondary{background:white;border:1px solid var(--line);color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.card{padding:18px;display:flex;flex-direction:column;border-top:4px solid var(--accent)}
+.card h2{font-size:1.42rem}
+.card .actions{margin-top:auto}
+.card .button{font-size:.89em}
+footer{border-top:1px solid var(--line);padding:14px 0}
+@media(max-width:690px){.cards{grid-template-columns:1fr}.top{justify-content:flex-start}}
+@page{size:A4;margin:16mm 17mm 17mm}
+@media print{
+  body{background:white;font-size:11.5pt;line-height:1.45}
+  main{width:auto;margin:0;padding:0}
+  .screen-only,button,footer{display:none!important}
+  .cover,.chapter{border:0;border-radius:0;padding:0;margin:0}
+  .cover{padding-top:7mm;border-top:4pt solid var(--accent)}
+  .chapter{break-before:page;padding-top:3mm}
+  .chapter h2{margin-top:3mm}
+  h1{font-size:36pt}
+  h2{font-size:23pt}
+  h3{break-after:avoid}
+  table,.snippet,figure{break-inside:avoid}
+  .cover figure{margin:10mm 0}
+  .toc{margin-top:7mm}
+  a{text-decoration:none}
+}
+</style>
+</head><body><main>
+
+<nav class="top screen-only" aria-label="Навигация по книге"><a href="./index.html">← Все редакции</a>
+<a href="./CR20KB_ChatGPT_Images_easy.pdf">Скачать PDF</a></nav>
+<header class="cover">
+<p class="kicker">CR20KB · Руководство по эксплуатации · 01</p>
+<h1>Картинки<br>с ChatGPT</h1>
+<p class="lead"><strong>Млад и стар</strong><br>От первой картинки до первой правки</p>
+
+<figure><svg viewBox="0 0 640 240" role="img" aria-labelledby="graphic-title graphic-desc">
+<title id="graphic-title">Робот с фонариком и свободная зона под текст</title>
+<desc id="graphic-desc">Условный макет баннера. Слева свободная треть, справа робот под снегом.</desc>
+<rect width="640" height="240" rx="18" fill="#183328"/>
+<path d="M360 208h236M426 206v-36m84 36v-36" stroke="#759187" stroke-width="5" stroke-linecap="round"/>
+<path d="M454 64V43m0 0 8-10" stroke="#cbe1bb" stroke-width="5" stroke-linecap="round"/>
+<circle cx="463" cy="33" r="7" fill="#edbd66"/>
+<rect x="400" y="63" width="113" height="72" rx="22" fill="#b6d9a4"/>
+<path d="M411 143h91l-6 44h-77z" fill="#71a784"/>
+<circle cx="438" cy="99" r="5" fill="#24382c"/>
+<circle cx="477" cy="99" r="5" fill="#24382c"/>
+<path d="M449 113q8 7 16 0m37 36 28 12" fill="none" stroke="#24382c" stroke-width="4" stroke-linecap="round"/>
+<path d="m506 152 20 8" stroke="#b6d9a4" stroke-width="6" stroke-linecap="round"/>
+<path d="M550 139l71-31v78l-71-27z" fill="#eec779" opacity=".28"/>
+<rect x="526" y="137" width="25" height="25" rx="5" fill="#f1bd65"/>
+<path d="M60 60h184v118H60z" fill="none" stroke="#8da99a" stroke-width="2" stroke-dasharray="7 7"/>
+<path d="M85 104h102m-102 19h78" stroke="#bdd2c6" stroke-width="4" stroke-linecap="round"/>
+<g fill="#d6e6e0"><circle cx="350" cy="61" r="3"/><circle cx="378" cy="104" r="3"/><circle cx="531" cy="49" r="3"/><circle cx="584" cy="67" r="3"/><circle cx="566" cy="107" r="3"/><circle cx="613" cy="39" r="3"/></g>
+</svg><figcaption>Учебный макет композиции. Объект и место под заголовок заданы отдельно.</figcaption></figure>
+
+<p class="meta">Текст и примеры — ChatGPT для CR20KB<br>Версия 1.0.0 · Источники сверены 6 ноября 2026</p>
+<nav class="toc" aria-label="Оглавление"><strong>Оглавление</strong><ol><li><a href="#first">Первая картинка</a></li><li><a href="#ingredients">Четыре подсказки, которые мне помогают</a></li><li><a href="#edit">Исправь одну вещь</a></li><li><a href="#reference">Используй свой рисунок</a></li><li><a href="#practice">Попробуй сам</a></li></ol></nav>
+</header>
+<section class="chapter" id="first">
+<h2>Первая картинка</h2>
+<p>Открой ChatGPT и напиши мне, какую картинку сделать. Можно начать с
+одного предложения. Скопируй пример целиком или замени фонарик своим
+предметом.</p>
+<div class="snippet"><pre class="text"><code>Создай квадратную картинку для открытки. Маленький зелёный робот сидит на деревянном столе и держит жёлтый фонарик. За окном идёт снег. Рисунок цветными карандашами, мягкий свет, без надписей.</code></pre></div>
+<p>Когда появится изображение, открой его крупнее. Проверь, видны ли
+робот и фонарик, остались ли края свободными и нет ли случайных букв.
+Сохрани картинку через меню изображения. Если картинка нужна для печати,
+сначала посмотри, как она выглядит в масштабе будущей открытки.</p>
+<p><strong>Если я ответил текстом.</strong> Напиши «Создай само
+изображение по этому описанию». Если в меню твоего ChatGPT есть
+инструмент «Изображения» или «Картинки», можно выбрать его. Названия в
+приложениях могут отличаться. <a
+href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">Справка
+ChatGPT Images</a>.</p>
+</section>
+<section class="chapter" id="ingredients">
+<h2>Четыре подсказки, которые мне помогают</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Что сказать</th>
+<th>Пример</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Кто или что на картинке</td>
+<td>Один зелёный робот с фонариком</td>
+</tr>
+<tr class="even">
+<td>Где это происходит</td>
+<td>На столе у окна, за окном снег</td>
+</tr>
+<tr class="odd">
+<td>Как должна выглядеть картинка</td>
+<td>Цветные карандаши, тёплый свет</td>
+</tr>
+<tr class="even">
+<td>Для чего она нужна</td>
+<td>Квадратная открытка без надписей</td>
+</tr>
+</tbody>
+</table>
+<p>Слова «сделай красиво» оставляют мне выбор. Слова «тёплый свет от
+фонарика, остальная комната в сумерках» дают мне конкретную задачу.
+Можно писать по-русски своими словами. Если сомневаешься между рисунком
+и фотографией, попроси сначала предложить две идеи, затем выбери одну и
+попроси сделать картинку.</p>
+<section id="вторая-проба" class="level3">
+<h3>Вторая проба</h3>
+<div class="snippet"><pre class="text"><code>Создай вертикальную иллюстрацию для семейной открытки. На подоконнике стоит красная кружка. За окном снег, на столе тёплый свет. Нарисуй акварелью. Оставь сверху свободное место для поздравления.</code></pre></div>
+<p><strong>Проверка.</strong> Мысленно поставь поздравление сверху. Если
+там оказалось окно с ярким снегом, попроси сделать верх спокойнее.</p>
+</section>
+</section>
+<section class="chapter" id="edit">
+<h2>Исправь одну вещь</h2>
+<p>Если робот тебе уже нравится, продолжай в том же чате. Если в чате
+есть несколько похожих вариантов, прикрепи выбранный файл или явно укажи
+картинку.</p>
+<div class="snippet"><pre class="text"><code>На выбранной картинке поменяй только цвет фонарика на синий. Сохрани зелёного робота, его позу, снег, стол и карандашный стиль. Оставь картинку квадратной.</code></pre></div>
+<p>Сравни старый и новый варианты. Если вместе с фонариком изменился
+робот, вернись к сохранённой версии и повтори просьбу. Если редактор
+позволяет выделить участок, выдели фонарик и повтори команду.
+Редактирование иногда затрагивает соседние детали. <a
+href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">Как
+редактировать в ChatGPT</a>.</p>
+<section id="когда-хочется-добавить-слова" class="level3">
+<h3>Когда хочется добавить слова</h3>
+<div class="snippet"><pre class="text"><code>Добавь сверху надпись «ТЁПЛЫЙ СВЕТ». Напиши именно эти два слова крупными буквами. Остальную композицию сохрани.</code></pre></div>
+<p>Прочитай надпись сам, особенно букву «Ё». Если текст снова исказился,
+сохрани версию со свободным местом и набери слова в редакторе
+открыток.</p>
+</section>
+</section>
+<section class="chapter" id="reference">
+<h2>Используй свой рисунок</h2>
+<p>Сфотографируй свой рисунок при хорошем свете. Прикрепи его к
+сообщению. Скажи, что в нём важно сохранить. Если на фото случайно видны
+адрес, документы или чужие лица, обрежь их перед загрузкой.</p>
+<div class="snippet"><pre class="text"><code>Сделай из моего рисунка цветную иллюстрацию. Сохрани форму головы и положение рук робота. Корпус зелёный, фонарик жёлтый. Сделай спокойный фон с окном и снегом. Используй стиль цветных карандашей.</code></pre></div>
+<p>Если рисунок попал в кадр под наклоном, я могу принять этот наклон за
+часть задумки. Сними лист прямо или добавь фразу «выровняй изображение,
+сохрани композицию рисунка».</p>
+</section>
+<section class="chapter" id="practice">
+<h2>Попробуй сам</h2>
+<ol type="1">
+<li>Выбери, куда пойдёт картинка. Например, в открытку или на заставку
+телефона.</li>
+<li>Опиши один главный предмет, место, стиль и форму кадра.</li>
+<li>Сделай первую версию и сохрани удачный результат.</li>
+<li>Измени одну деталь и сравни две картинки.</li>
+<li>Перед отправкой проверь слова, края кадра и всё важное в твоём
+сюжете.</li>
+</ol>
+<p><strong>Карманная команда</strong></p>
+<div class="snippet"><pre class="text"><code>Сделай [что] для [куда]. Покажи [предмет и действие] в [место]. Используй [стиль]. Формат [квадратный, широкий или высокий]. Важно сохранить [деталь].</code></pre></div>
+<section id="откуда-взяты-принципы" class="level3">
+<h3>Откуда взяты принципы</h3>
+<p>Примеры в книге придуманы для CR20KB. Приёмы сверены с <a
+href="https://developers.openai.com/api/docs/guides/image-prompting">официальным
+руководством OpenAI по запросам</a> и <a
+href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">справкой
+по картинкам в ChatGPT</a>.</p>
+</section>
+</section>
+
+<footer class="screen-only">Самостоятельное руководство CR20KB. <a href="https://github.com/cr20kb-commits/cr20kb-calculate/tree/main/chatgpt-images">Исходники на GitHub</a>.</footer>
+</main><script>
+document.querySelectorAll('.snippet pre').forEach(pre => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'copy screen-only';
+  button.textContent = 'Копировать команду';
+  button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(pre.textContent.trim());
+      button.textContent = 'Скопировано';
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(pre);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      button.textContent = 'Текст выделен';
+    }
+  });
+  pre.after(button);
+});
+</script></body></html>
