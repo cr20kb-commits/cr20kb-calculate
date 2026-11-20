@@ -3,8 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Шаблоны заданий, работа с вложениями, надписи и проверка перед публикацией.">
 <meta name="theme-color" content="#eef1ee">
-<meta name="cr20kb-edition" content="1.0.0">
-<meta name="cr20kb-verified" content="2026-11-06">
+<meta name="cr20kb-edition" content="1.1.0">
+<meta name="cr20kb-verified" content="2026-11-20">
 <link rel="canonical" href="https://cr20kb.com/utilities/chatgpt-images/standard.html">
 <title>Картинки с ChatGPT · Стандарт | CR20KB</title>
 <style>:root{--accent:#225c83}
@@ -100,8 +100,8 @@ footer{border-top:1px solid var(--line);padding:14px 0}
 <g fill="#d6e6e0"><circle cx="350" cy="61" r="3"/><circle cx="378" cy="104" r="3"/><circle cx="531" cy="49" r="3"/><circle cx="584" cy="67" r="3"/><circle cx="566" cy="107" r="3"/><circle cx="613" cy="39" r="3"/></g>
 </svg><figcaption>Учебный макет композиции. Объект и место под заголовок заданы отдельно.</figcaption></figure>
 
-<p class="meta">Текст и примеры — ChatGPT для CR20KB<br>Версия 1.0.0 · Источники сверены 6 ноября 2026</p>
-<nav class="toc" aria-label="Оглавление"><strong>Оглавление</strong><ol><li><a href="#brief">Что именно поручить ChatGPT</a></li><li><a href="#variants">Подготовь два разных направления</a></li><li><a href="#edit">Правь картинку и назначай роли вложениям</a></li><li><a href="#output">Текст, прозрачность и размеры</a></li><li><a href="#recipes">Рабочие сценарии</a></li><li><a href="#troubleshoot">Быстрый ремонт результата</a></li></ol></nav>
+<p class="meta">Текст и примеры — ChatGPT для CR20KB<br>Версия 1.1.0 · Источники сверены 20 ноября 2026</p>
+<nav class="toc" aria-label="Оглавление"><strong>Оглавление</strong><ol><li><a href="#brief">Что именно поручить ChatGPT</a></li><li><a href="#variants">Подготовь два разных направления</a></li><li><a href="#edit">Правь картинку и назначай роли вложениям</a></li><li><a href="#output">Текст, прозрачность и размеры</a></li><li><a href="#recipes">Рабочие сценарии</a></li><li><a href="#gif-reference">GIF и повторное использование фото</a></li><li><a href="#troubleshoot">Быстрый ремонт результата</a></li></ol></nav>
 </header>
 <section class="chapter" id="brief">
 <h2>Что именно поручить ChatGPT</h2>
@@ -173,7 +173,7 @@ href="https://developers.openai.com/api/docs/guides/image-prompting">Как
 важная зона изменилась, повтори от удачного исходника. Для сохранения
 пикселей за пределами области используй обычный редактор и вклей
 исправленный участок. <a
-href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">Редактирование
+href="https://help.openai.com/ru-ru/articles/11084440-images-in-chatgpt">Редактирование
 в ChatGPT</a> · <a
 href="https://developers.openai.com/api/docs/guides/image-prompting">Роли
 референсов</a>.</p>
@@ -196,7 +196,7 @@ href="https://developers.openai.com/api/docs/guides/image-prompting">Роли
 картинке. Проверь альфа-канал в редакторе. JPG прозрачность не
 сохраняет. Для точного экспортного размера, например 1200 × 630,
 подготовь холст в редакторе и обрежь изображение с учётом композиции. <a
-href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">Поддерживаемые
+href="https://help.openai.com/ru-ru/articles/11084440-images-in-chatgpt">Поддерживаемые
 функции ChatGPT Images</a>.</p>
 </section>
 </section>
@@ -219,6 +219,26 @@ href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">П�
 <h3>Рисунок по эскизу</h3>
 <div class="snippet"><pre class="text"><code>Преврати мой эскиз в иллюстрацию концепта настольного светильника. Сохрани положение шарнира и общий силуэт. Покажи матовый зелёный корпус и рассеянный тёплый свет. Без размеров и технических обозначений.</code></pre></div>
 </section>
+</section>
+<section class="chapter" id="gif-reference">
+<h2>GIF и повторное использование фото</h2>
+<p>В ChatGPT постепенно появляется создание зацикленных GIF. Опиши
+движение или приложи неподвижную картинку для анимации. Созданную GIF
+можно править сообщением и открыть для изменения скорости, скачивания
+или отправки. Загруженную готовую анимированную GIF ChatGPT
+редактировать не умеет.</p>
+<div class="snippet"><pre class="text"><code>Сделай зацикленную GIF: зелёный робот медленно поднимает фонарик и возвращает его на место. Камера неподвижна, текст не добавляй.</code></pre></div>
+<p>Фото можно попросить сохранить как образец с именем. В другом чате
+используй @ и это имя. Например, назови свой фонарик «Маяк», затем
+попроси «Сделай акварельную открытку с <span class="citation"
+data-cites="Маяк">@Маяк</span>». Убедись, что сохранён правильный
+образец и его использование подходит задаче.</p>
+<p>Английская справка уже описывает ChatGPT Images 2.6; русский перевод
+на дату сверки ещё сообщает 2.5. Для свежих функций проверяй оригинал и
+доступность в аккаунте. Это названия продукта ChatGPT, а не API-параметр
+<code>model</code>. <a
+href="https://help.openai.com/en/articles/11084440-images-in-chatgpt">Справка
+на английском</a>.</p>
 </section>
 <section class="chapter" id="troubleshoot">
 <h2>Быстрый ремонт результата</h2>
@@ -274,7 +294,7 @@ href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">П�
 <p><a
 href="https://developers.openai.com/api/docs/guides/image-prompting">Руководство
 OpenAI по запросам</a> · <a
-href="https://help.openai.com/ru-ru/articles/11084440-chatgpt-image-library">Справка
+href="https://help.openai.com/ru-ru/articles/11084440-images-in-chatgpt">Справка
 ChatGPT Images</a> · <a
 href="https://learn.chatgpt.com/docs/image-generation">Работа с
 изображениями в ChatGPT и Codex</a>.</p>
