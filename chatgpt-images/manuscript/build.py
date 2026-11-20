@@ -5,9 +5,9 @@ import subprocess
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / "release"
-VERSION = "1.0.0"
-DATE = "2026-11-06"
-DISPLAY_DATE = "6 ноября 2026"
+VERSION = "1.1.0"
+DATE = "2026-11-20"
+DISPLAY_DATE = "20 ноября 2026"
 GITHUB = "https://github.com/cr20kb-commits/cr20kb-calculate/tree/main/chatgpt-images"
 PUBLIC = "https://cr20kb.com/utilities/chatgpt-images/"
 EDITIONS = {

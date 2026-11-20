@@ -3,8 +3,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Codex, Git, права, Sites, API, MCP, автоматизация и проверка выпуска.">
 <meta name="theme-color" content="#eef1ee">
-<meta name="cr20kb-edition" content="1.0.0">
-<meta name="cr20kb-verified" content="2026-11-06">
+<meta name="cr20kb-edition" content="1.1.0">
+<meta name="cr20kb-verified" content="2026-11-20">
 <link rel="canonical" href="https://cr20kb.com/utilities/chatgpt-handbook/pro.html">
 <title>ChatGPT в деле · Профи | CR20KB</title>
 <style>:root{--accent:#81552b}
@@ -96,7 +96,7 @@ footer{border-top:1px solid var(--line);padding:14px 0}
 <g fill="#fff4e4"><circle cx="482" cy="92" r="2"/><circle cx="491" cy="92" r="2"/><circle cx="500" cy="92" r="2"/></g>
 </svg><figcaption>Диалог, готовый результат и разработка. Выбирай способ работы по задаче.</figcaption></figure>
 
-<p class="meta">Текст и примеры — ChatGPT для CR20KB<br>Версия 1.0.0 · Источники сверены 6 ноября 2026</p>
+<p class="meta">Текст и примеры — ChatGPT для CR20KB<br>Версия 1.1.0 · Источники сверены 20 ноября 2026</p>
 <nav class="toc" aria-label="Оглавление"><strong>Оглавление</strong><ol><li><a href="#architecture">Архитектура работы и границы доступа</a></li><li><a href="#brief">Техническое задание и критерии приёмки</a></li><li><a href="#knowledge">Контекст, знания и правила проекта</a></li><li><a href="#research">Исследование с проверяемой цепочкой</a></li><li><a href="#analysis">Данные, расчёты и контроль происхождения</a></li><li><a href="#artifacts">Артефакты и контроль публикации</a></li><li><a href="#codex">Код и Git от диагностики до PR</a></li><li><a href="#sites">Сайты, интерактивные инструменты и выпуск</a></li><li><a href="#tools">Действия в приложениях и браузере</a></li><li><a href="#skills">Повторяемые процессы, Skills и MCP</a></li><li><a href="#automation">Автоматизация и длительная работа</a></li><li><a href="#api">API, когда результат нужен в программе</a></li><li><a href="#evaluation">Проверка агента, модели и рабочего процесса</a></li><li><a href="#security">Безопасность данных и эксплуатация в команде</a></li><li><a href="#release">Чек-лист технического выпуска</a></li></ol></nav>
 </header>
 <section class="chapter" id="architecture">
@@ -223,8 +223,12 @@ href="https://learn.chatgpt.com/docs/cloud">Облачный Codex</a>.</p>
 <p>Для новых специализированных процессов проверь доступность проектов,
 skills и workspace agents. По справке на дату сверки личные аккаунты
 могут использовать существующие GPT, а создание новых GPT для личных
-аккаунтов закрыто. В управляемом рабочем пространстве проверяй
-доступность, настройки и свои права. <a
+аккаунтов закрыто. Для затронутых Enterprise-пространств создание новых
+GPT прекращено 26 октября 2026, кроме FedRAMP. Стандартное прекращение
+поддержки запланировано на 11 декабря 2026; для FedRAMP и одобренной
+отсрочки — 28 февраля 2027. После миграции в плагин исходный GPT
+доступен только для чтения. Сверяй уведомление своего пространства и
+опубликованную версию перед переносом. <a
 href="https://help.openai.com/en/articles/10169521-projects-in-chatgpt">Проекты</a>
 · <a
 href="https://help.openai.com/en/articles/8590148-memory-in-chatgpt">Память</a>
@@ -427,6 +431,24 @@ href="https://learn.chatgpt.com/docs/automations">Задачи по
 расписанию</a> · <a
 href="https://learn.chatgpt.com/docs/long-running-work">Длительная
 работа</a>.</p>
+<section id="события-и-голосовое-управление" class="level3">
+<h3>События и голосовое управление</h3>
+<p>В веб-версии и мобильных приложениях на подходящих тарифах задачи
+могут запускаться по поддерживаемым событиям Gmail, Slack и GitHub.
+Соединение должно быть настроено заранее. Событийный запуск нельзя
+совмещать с расписанием в одной задаче; близкие события могут
+объединяться. Проверяй журнал запусков и защиту от повторной записи. <a
+href="https://learn.chatgpt.com/docs/automations">Условия событийных
+задач</a>.</p>
+<p>В настольном приложении ChatGPT Voice работает в Chat, Work и Codex
+на поддерживаемых платных тарифах. Начало голосового разговора внутри
+существующей задачи Codex разворачивается постепенно. Если Start voice
+chat отсутствует, проверь обновление приложения и хоста, аккаунт и
+настройки пространства. Одновременно активен один голосовой разговор.
+Диктовка только вводит текст и отличается от живого голосового диалога.
+<a href="https://learn.chatgpt.com/docs/features/voice">Голос в
+настольном приложении</a>.</p>
+</section>
 </section>
 <section class="chapter" id="api">
 <h2>API, когда результат нужен в программе</h2>
